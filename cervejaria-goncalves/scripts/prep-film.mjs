@@ -47,16 +47,18 @@ for (const scene of SCENES) {
   const scrub = scene.mode === 'scrub'
   // scrub: menor e só keyframes (-g 1) para o seek ser instantâneo
   const enc = scrub
-    ? ['-c:v', 'libx264', '-preset', 'slow', '-crf', '30', '-g', '1', '-keyint_min', '1', '-sc_threshold', '0']
-    : ['-c:v', 'libx264', '-preset', 'slow', '-crf', '27', '-g', '48']
+    ? ['-c:v', 'libx264', '-preset', 'slow', '-crf', '32', '-g', '1', '-keyint_min', '1', '-sc_threshold', '0']
+    : ['-c:v', 'libx264', '-preset', 'slow', '-crf', '31', '-g', '48']
   const common = ['-an', '-pix_fmt', 'yuv420p', '-movflags', '+faststart', '-r', scrub ? '30' : '24']
-  const wD = scrub ? 1280 : 1600
-  const hM = scrub ? 1136 : 1280
+  const wD = scrub ? 1280 : 1280
+  const hM = scrub ? 1136 : 1136
+  // leve redução de ruído: grão de câmera custa muitos bytes e some na tela
+  const dn = 'hqdn3d=2:2:6:6,'
 
   const desktop = `${scene.key}.mp4`
   const mobile = `${scene.key}-m.mp4`
-  ff([...trim, '-i', src, '-vf', `scale=${wD}:-2:flags=lanczos`, ...enc, ...common, join(OUT, desktop)])
-  ff([...trim, '-i', src, '-vf', `crop='min(iw,ih*9/16)':ih,scale=-2:${hM}:flags=lanczos`, ...enc, ...common, join(OUT, mobile)])
+  ff([...trim, '-i', src, '-vf', `${dn}scale=${wD}:-2:flags=lanczos`, ...enc, ...common, join(OUT, desktop)])
+  ff([...trim, '-i', src, '-vf', `${dn}crop='min(iw,ih*9/16)':ih,scale=-2:${hM}:flags=lanczos`, ...enc, ...common, join(OUT, mobile)])
   ff(['-i', join(OUT, desktop), '-frames:v', '1', '-q:v', '70', join(OUT, `${scene.key}.webp`)])
   ff(['-i', join(OUT, mobile), '-frames:v', '1', '-q:v', '70', join(OUT, `${scene.key}-m.webp`)])
 

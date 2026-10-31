@@ -1,0 +1,11 @@
+{
+  "hero": { "inicio": 8, "duracao": 4 },
+  "espuma": { "inicio": 0, "duracao": 8 },
+  "lager": { "inicio": 1, "duracao": 8 },
+  "ipa": { "inicio": 1, "duracao": 7 },
+  "weiss": { "inicio": 5, "duracao": 8 },
+  "malte": { "inicio": 1, "duracao": 6 },
+  "lupulo": { "duracao": 7 },
+  "fermentacao": { "inicio": 2, "duracao": 7 },
+  "bar": { "duracao": 8 }
+}

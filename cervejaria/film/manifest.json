@@ -1,0 +1,75 @@
+{
+  "geradoEm": "2026-10-31T15:30:41.352Z",
+  "scenes": {
+    "hero": {
+      "desktop": "hero.mp4",
+      "mobile": "hero-m.mp4",
+      "poster": "hero.webp",
+      "posterMobile": "hero-m.webp",
+      "duration": 4.04
+    },
+    "mergulho": {
+      "desktop": "mergulho.mp4",
+      "mobile": "mergulho-m.mp4",
+      "poster": "mergulho.webp",
+      "posterMobile": "mergulho-m.webp",
+      "duration": 7.93
+    },
+    "lager": {
+      "desktop": "lager.mp4",
+      "mobile": "lager-m.mp4",
+      "poster": "lager.webp",
+      "posterMobile": "lager-m.webp",
+      "duration": 8.08
+    },
+    "ipa": {
+      "desktop": "ipa.mp4",
+      "mobile": "ipa-m.mp4",
+      "poster": "ipa.webp",
+      "posterMobile": "ipa-m.webp",
+      "duration": 7.08
+    },
+    "weiss": {
+      "desktop": "weiss.mp4",
+      "mobile": "weiss-m.mp4",
+      "poster": "weiss.webp",
+      "posterMobile": "weiss-m.webp",
+      "duration": 8.08
+    },
+    "malte": {
+      "desktop": "malte.mp4",
+      "mobile": "malte-m.mp4",
+      "poster": "malte.webp",
+      "posterMobile": "malte-m.webp",
+      "duration": 6.08
+    },
+    "lupulo": {
+      "desktop": "lupulo.mp4",
+      "mobile": "lupulo-m.mp4",
+      "poster": "lupulo.webp",
+      "posterMobile": "lupulo-m.webp",
+      "duration": 7
+    },
+    "fermentacao": {
+      "desktop": "fermentacao.mp4",
+      "mobile": "fermentacao-m.mp4",
+      "poster": "fermentacao.webp",
+      "posterMobile": "fermentacao-m.webp",
+      "duration": 7.08
+    },
+    "espuma": {
+      "desktop": "espuma.mp4",
+      "mobile": "espuma-m.mp4",
+      "poster": "espuma.webp",
+      "posterMobile": "espuma-m.webp",
+      "duration": 8
+    },
+    "bar": {
+      "desktop": "bar.mp4",
+      "mobile": "bar-m.mp4",
+      "poster": "bar.webp",
+      "posterMobile": "bar-m.webp",
+      "duration": 8
+    }
+  }
+}

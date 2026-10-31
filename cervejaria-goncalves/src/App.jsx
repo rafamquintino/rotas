@@ -102,8 +102,9 @@ export default function App() {
     let solid = false
     const header = document.querySelector('.site-header')
     const accent = () => {
+      const isFilm = document.documentElement.classList.contains('is-film')
       const onLight =
-        (scroll.foam > 0.45 && scroll.bar < 0.3) ||
+        (!isFilm && scroll.foam > 0.45 && scroll.bar < 0.3) ||
         (scroll.styles > 0.7 && scroll.styles < 1 && innerWidth < 900 && !document.documentElement.classList.contains('is-film'))
       if (onLight !== light) {
         light = onLight
