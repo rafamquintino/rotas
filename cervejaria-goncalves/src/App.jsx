@@ -46,7 +46,8 @@ export default function App() {
   // Lenis + ScrollTrigger
   useEffect(() => {
     const lenis = new Lenis({
-      lerp: device.reduced ? 1 : 0.085,
+      lerp: device.reduced ? 1 : 0.13,
+      wheelMultiplier: 1.15,
       smoothWheel: !device.reduced,
       syncTouch: false,
     })

@@ -225,11 +225,11 @@ html[data-tier='low'] .grain {
   height: 100svh;
   overflow: hidden;
 }
-.phase--hero { height: 210svh; }
-.phase--dive { height: 230svh; }
-.phase--styles { height: 480svh; }
-.phase--process { height: 420svh; }
-.phase--foam { height: 230svh; }
+.phase--hero { height: 130svh; }
+.phase--dive { height: 160svh; }
+.phase--styles { height: 300svh; }
+.phase--process { height: 270svh; }
+.phase--foam { height: 150svh; }
 
 /* ---------- Herói ---------- */
 .hero-copy {
@@ -1178,4 +1178,20 @@ html[data-tier='none'] .phase--foam { background: linear-gradient(#3e2304, var(-
     padding-top: 24svh;
     font-size: 21vw;
   }
+}
+
+/* sombreados fixos na tela: não deslizam junto com a seção nas trocas */
+.styles-inner::after,
+.process-inner::after,
+.is-film .styles-inner::before,
+.is-film .process-inner::before {
+  position: fixed;
+}
+.is-film .site-header {
+  text-shadow: 0 1px 10px rgba(18, 10, 4, 0.55);
+}
+.is-film .header-cta {
+  background: rgba(18, 10, 4, 0.25);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
 }
