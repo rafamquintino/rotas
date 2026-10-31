@@ -154,6 +154,7 @@ export default function App() {
     lenisRef.current?.scrollTo(y, { duration: 1.2 })
   }, [])
 
+  const stepDown = useCallback(() => setTier((t) => (t === 'high' ? 'mid' : 'low')), [])
   const settings = noGL ? null : TIER_SETTINGS[tier]
 
   return (
@@ -161,7 +162,7 @@ export default function App() {
       {!noGL && (
         <div className="stage" aria-hidden="true">
           <Suspense fallback={null}>
-            <Scene settings={settings} reduced={device.reduced} onDecline={() => setTier((t) => (t === 'high' ? 'mid' : 'low'))} />
+            <Scene settings={settings} reduced={device.reduced} onDecline={stepDown} />
           </Suspense>
         </div>
       )}

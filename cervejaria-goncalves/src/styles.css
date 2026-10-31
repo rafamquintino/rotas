@@ -129,7 +129,7 @@ main {
 }
 .grain {
   position: fixed;
-  inset: -100%;
+  inset: -12%;
   z-index: 60;
   pointer-events: none;
   opacity: 0.085;

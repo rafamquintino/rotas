@@ -59,7 +59,7 @@ export default function Experience({ settings, reduced }) {
   useFrame((state, dt) => {
     const t = state.clock.elapsedTime
     dt = Math.min(dt, 0.05)
-    if (!fx.ready && ++fx.frames > 4) fx.ready = true
+    if (!fx.ready && ++fx.frames > 5) fx.ready = true
     fx.boost = Math.max(0, fx.boost - dt * 0.8)
 
     const { hero, dive, bar: barP } = scroll
@@ -104,8 +104,9 @@ export default function Experience({ settings, reduced }) {
     camera.lookAt(camLook.current)
 
     // ---------- mundo externo ----------
-    glassWrap.current.visible = !interior
-    bar.current.visible = inBar
+    const warm = fx.frames < 4 // compila todos os shaders enquanto o loader cobre a tela
+    glassWrap.current.visible = !interior || warm
+    bar.current.visible = inBar || warm
     title.current.visible = !interior && !inBar
     glow.current.visible = !interior && !inBar
     if (!interior) {

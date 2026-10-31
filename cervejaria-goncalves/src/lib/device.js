@@ -26,12 +26,19 @@ export function detectTier() {
       gpu,
     )
 
+  // GPUs integradas (Intel, AMD APU genérica) aguentam o site, mas não a refração em tela cheia
+  const integrated = /Intel|UHD|Iris|Radeon\(TM\) Graphics|Radeon Graphics|Vega \d|Microsoft Basic/i.test(gpu)
+  const smallScreen = Math.max(screen.width, screen.height) * (window.devicePixelRatio || 1) < 1400
+
   let score = 3
   if (mobile) score -= 1
+  if (mobile && (cores <= 6 || mem <= 4)) score -= 1
   if (cores <= 4) score -= 1
-  if (mem <= 3) score -= 1
+  if (mem <= 4) score -= 1
+  if (integrated) score -= 1
   if (weakGpu) score -= 2
   if (saveData || reduced) score -= 1
+  if (smallScreen && !mobile) score -= 1
 
   if (['high', 'mid', 'low', 'none'].includes(forced)) return { tier: forced, reduced, mobile, gpu }
   const tier = score >= 3 ? 'high' : score >= 1 ? 'mid' : 'low'
@@ -39,7 +46,7 @@ export function detectTier() {
 }
 
 export const TIER_SETTINGS = {
-  high: { dpr: [1, 2], interior: 1500, glass: 180, foam: 260, items: 30, bokeh: 60, transmission: true, aa: true, env: true },
-  mid: { dpr: [1, 1.5], interior: 750, glass: 110, foam: 150, items: 20, bokeh: 36, transmission: true, aa: true, env: true },
-  low: { dpr: [1, 1], interior: 280, glass: 50, foam: 70, items: 10, bokeh: 18, transmission: false, aa: false, env: true },
+  high: { dpr: [1, 1.5], txScale: 0.6, interior: 1200, glass: 160, foam: 220, items: 26, bokeh: 50, transmission: true, aa: true, env: true },
+  mid: { dpr: [1, 1.25], txScale: 0.45, interior: 650, glass: 100, foam: 130, items: 18, bokeh: 32, transmission: true, aa: false, env: true },
+  low: { dpr: [0.8, 1], txScale: 0.5, interior: 260, glass: 50, foam: 70, items: 10, bokeh: 18, transmission: false, aa: false, env: true },
 }
