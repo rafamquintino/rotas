@@ -15,7 +15,7 @@ export default function Loader({ onEnter }) {
   useEffect(() => {
     const s = state.current
     const start = performance.now()
-    const minTime = start + 1700
+    const minTime = start + 1100
     let raf
     const tick = () => {
       const fontsOk = document.fonts?.status !== 'loading'

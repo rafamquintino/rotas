@@ -2,7 +2,7 @@ import { useMemo, useRef } from 'react'
 import { useFrame, useThree } from '@react-three/fiber'
 import * as THREE from 'three'
 import Bubbles from './Bubbles'
-import { scroll } from '../lib/store'
+import { scroll, fx } from '../lib/store'
 import { interiorPalette, makePalette } from './palette'
 import { makeGrainGeometry, makeHopGeometry, makeYeastGeometry } from './geometry'
 import { rayTexture } from './textures'
@@ -59,8 +59,8 @@ function ProcessItems({ geometry, color, count, spread, mode, getK }) {
     const k = getK() * (1 - ss(0, 0.4, scroll.foam))
     const mesh = ref.current
     if (!mesh) return
-    mesh.visible = k > 0.001
-    if (!mesh.visible) return
+    mesh.visible = k > 0.001 || fx.frames < 4
+    if (k <= 0.001) return
     const t = state.clock.elapsedTime
     field.forEach((f, i) => {
       dummy.position.copy(f.p)
@@ -116,7 +116,8 @@ export default function Interior({ settings, visibleRef }) {
 
   useFrame((state) => {
     const on = visibleRef.current === 'interior'
-    group.current.visible = on
+    const warm = fx.frames < 4
+    group.current.visible = on || warm
     scene.fog = on ? fog : null
     if (!on) return
     interiorPalette(pal)

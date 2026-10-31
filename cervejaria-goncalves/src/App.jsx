@@ -11,18 +11,37 @@ import { BEERS } from './lib/beers'
 
 gsap.registerPlugin(ScrollTrigger)
 const Scene = lazy(() => import('./three/Scene'))
+const Film = lazy(() => import('./film/Film'))
+
+// Se existir film/manifest.json (gerado por scripts/prep-film.mjs), o site usa vídeo real.
+// Sem ele, usa a cena 3D procedural.
+function useStage() {
+  const [stage, setStage] = useState({ kind: 'pending' })
+  useEffect(() => {
+    const forced = new URLSearchParams(location.search).get('stage')
+    if (forced === '3d') return setStage({ kind: '3d' })
+    fetch(`${import.meta.env.BASE_URL}film/manifest.json`, { cache: 'no-cache' })
+      .then((r) => (r.ok ? r.json() : null))
+      .then((m) => setStage(m?.scenes?.hero ? { kind: 'film', manifest: m } : { kind: '3d' }))
+      .catch(() => setStage({ kind: '3d' }))
+  }, [])
+  return stage
+}
 
 export default function App() {
   const device = useMemo(detectTier, [])
   const [tier, setTier] = useState(device.tier)
   const [entered, setEntered] = useState(false)
   const lenisRef = useRef(null)
-  const noGL = tier === 'none'
+  const stage = useStage()
+  const film = stage.kind === 'film'
+  const noGL = tier === 'none' && !film
 
   useEffect(() => {
-    document.documentElement.dataset.tier = tier
-    if (noGL) fx.ready = true
-  }, [tier, noGL])
+    document.documentElement.dataset.tier = film ? 'film' : tier
+    document.documentElement.classList.toggle('is-film', film)
+    if (noGL && stage.kind !== 'pending') fx.ready = true
+  }, [tier, noGL, film, stage.kind])
 
   // Lenis + ScrollTrigger
   useEffect(() => {
@@ -83,9 +102,10 @@ export default function App() {
     let solid = false
     const header = document.querySelector('.site-header')
     const accent = () => {
+      const isFilm = document.documentElement.classList.contains('is-film')
       const onLight =
-        (scroll.foam > 0.45 && scroll.bar < 0.3) ||
-        (scroll.styles > 0.7 && scroll.styles < 1 && innerWidth < 900)
+        (!isFilm && scroll.foam > 0.45 && scroll.bar < 0.3) ||
+        (scroll.styles > 0.7 && scroll.styles < 1 && innerWidth < 900 && !document.documentElement.classList.contains('is-film'))
       if (onLight !== light) {
         light = onLight
         header?.classList.toggle('on-light', light)
@@ -154,20 +174,26 @@ export default function App() {
     lenisRef.current?.scrollTo(y, { duration: 1.2 })
   }, [])
 
+  const stepDown = useCallback(() => setTier((t) => (t === 'high' ? 'mid' : 'low')), [])
   const settings = noGL ? null : TIER_SETTINGS[tier]
 
   return (
     <>
-      {!noGL && (
+      {film && (
+        <Suspense fallback={null}>
+          <Film manifest={stage.manifest} reduced={device.reduced} />
+        </Suspense>
+      )}
+      {stage.kind === '3d' && !noGL && (
         <div className="stage" aria-hidden="true">
           <Suspense fallback={null}>
-            <Scene settings={settings} reduced={device.reduced} onDecline={() => setTier((t) => (t === 'high' ? 'mid' : 'low'))} />
+            <Scene settings={settings} reduced={device.reduced} onDecline={stepDown} />
           </Suspense>
         </div>
       )}
       <div id="veil" aria-hidden="true" />
       <Header goTo={goTo} />
-      <Sections jump={jump} noGL={noGL} />
+      <Sections jump={jump} noGL={noGL && stage.kind === '3d'} />
       <div className="grain" aria-hidden="true" />
       <Cursor />
       {!entered && <Loader onEnter={onEnter} />}

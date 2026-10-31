@@ -1,0 +1,5 @@
+# vídeos brutos ficam fora do git (pesados); só a versão preparada em public/film entra
+*
+!.gitignore
+!cortes.json
+!LEIA-ME.md

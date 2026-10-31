@@ -280,7 +280,7 @@ function Foam() {
       gsap
         .timeline({ scrollTrigger: { trigger: ref.current, start: 'top top', end: 'bottom bottom', scrub: true } })
         .fromTo('.foam-copy', { opacity: 0, y: 40 }, { opacity: 1, y: 0, duration: 0.3 })
-        .to('.foam-copy', { color: '#120A04', duration: 0.3 }, 0.35)
+        .to('.foam-copy', { color: document.documentElement.classList.contains('is-film') ? '#F4EAD5' : '#120A04', duration: 0.3 }, 0.35)
         .to('.foam-copy', { opacity: 0, y: -40, duration: 0.2 }, 0.75)
     }, ref)
     return () => ctx.revert()
