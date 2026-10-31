@@ -15,6 +15,17 @@ npm run build    # gera o site estático em ../cervejaria
 
 O build sai em `/cervejaria` na raiz do repositório, com caminhos relativos, então funciona em qualquer subpasta (GitHub Pages, Netlify, hospedagem comum).
 
+## Vídeo real (modo filme)
+
+O fundo pode ser **vídeo real controlado pelo scroll** em vez do 3D:
+
+1. Coloque os vídeos em `footage/` com o nome de cada cena (roteiro em `footage/LEIA-ME.md`).
+2. Rode `npm run film`. O script (ffmpeg) gera as versões desktop e celular em `public/film/` e o `manifest.json`.
+3. Rode `npm run build`.
+
+Enquanto não existir `footage/hero.*`, o site continua usando a cena 3D. Para forçar o 3D, use `?stage=3d` na URL.
+As cenas ficam em `src/film/scenes.js`, e o palco em `src/film/Film.jsx`. Só os vídeos visíveis tocam, e os próximos são pré-carregados em ordem.
+
 ## Onde editar
 
 | O quê | Arquivo |

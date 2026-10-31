@@ -1098,3 +1098,70 @@ html[data-tier='none'] .phase--foam { background: linear-gradient(#3e2304, var(-
   .style-tabs { top: 3.6rem; }
   .beer-notes div:nth-child(n + 3) { display: none; }
 }
+
+/* ==========================================================
+   Palco de vídeo real (modo filme)
+   ========================================================== */
+.film {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  height: 100lvh;
+  overflow: hidden;
+  background: var(--breu);
+  isolation: isolate;
+}
+.film-layer {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  will-change: opacity;
+}
+/* o vídeo do herói "clareia" por cima do título: onde o fundo é escuro, o título aparece; o copo fica na frente */
+.film-layer--hero {
+  mix-blend-mode: screen;
+}
+.film-title {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  margin: 0;
+  font-family: var(--stencil);
+  font-weight: 900;
+  font-size: 19.5vw;
+  line-height: 1;
+  color: var(--espuma);
+  letter-spacing: -0.01em;
+  pointer-events: none;
+}
+.film-shade {
+  /* leve vinheta para leitura e unidade de cor */
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(120% 90% at 50% 40%, rgba(18, 10, 4, 0) 40%, rgba(18, 10, 4, 0.55) 100%);
+  pointer-events: none;
+}
+/* no modo filme, nomes de estilo ficam claros (o fundo é imprevisível) */
+.is-film .beer-name,
+.is-film .style-tab {
+  color: var(--espuma);
+  text-shadow: 0 2px 24px rgba(18, 10, 4, 0.45);
+}
+.is-film .style-tab::before {
+  background: rgba(244, 234, 213, 0.3);
+}
+.is-film .style-tab-fill {
+  background: var(--beer);
+}
+.is-film .styles-inner::before,
+.is-film .process-inner::before {
+  content: '';
+  position: absolute;
+  inset: 0 0 60% 0;
+  background: linear-gradient(rgba(18, 10, 4, 0.5), rgba(18, 10, 4, 0));
+  pointer-events: none;
+  opacity: var(--out, 1);
+}
