@@ -1,34 +1,28 @@
 import { useEffect, useRef, useState } from 'react'
 import gsap from 'gsap'
-import GlassSVG from './GlassSVG'
-import { fx } from '../lib/store'
+import logo from '../assets/logo.webp'
 
 const AGE_KEY = 'goncalves-maior-18'
 
-/** Tela de carregamento: copo enchendo + confirmação de maioridade. */
+/** Abertura: o miolo do selo enche de cerveja amarela; depois, confirmação de idade. */
 export default function Loader({ onEnter }) {
   const [pct, setPct] = useState(0)
   const [stage, setStage] = useState('loading') // loading | gate | denied | leaving
   const root = useRef()
-  const state = useRef({ v: 0 })
 
   useEffect(() => {
-    const s = state.current
     const start = performance.now()
-    const minTime = start + 1100
     let raf
     const tick = () => {
+      const t = (performance.now() - start) / 1000
       const fontsOk = document.fonts?.status !== 'loading'
-      const done = fx.ready && fontsOk && performance.now() > minTime
-      const el = (performance.now() - start) / 1000
-      const target = done ? 100 : 92 * (1 - Math.exp(-el / 1.4))
-      s.v += (target - s.v) * (done ? 0.12 : 0.2)
-      if (done && s.v > 99.4) s.v = 100
-      setPct(s.v)
-      if (s.v >= 100) {
-        setStage(localStorage.getItem(AGE_KEY) === '1' ? 'leaving' : 'gate')
-        return
-      }
+      const imgsOk = [...document.images].every((i) => i.complete)
+      const ready = fontsOk && imgsOk && t > 1.2
+      const target = ready ? 100 : 90 * (1 - Math.exp(-t / 0.7))
+      setPct((p) => {
+        const v = p + (target - p) * 0.14
+        return ready && v > 99.5 ? 100 : v
+      })
       raf = requestAnimationFrame(tick)
     }
     raf = requestAnimationFrame(tick)
@@ -36,22 +30,43 @@ export default function Loader({ onEnter }) {
   }, [])
 
   useEffect(() => {
-    if (stage === 'gate') root.current.querySelector('.gate button')?.focus()
+    if (pct < 100 || stage !== 'loading') return
+    let ok = false
+    try {
+      ok = localStorage.getItem(AGE_KEY) === '1'
+    } catch {}
+    setStage(ok ? 'leaving' : 'gate')
+  }, [pct, stage])
+
+  useEffect(() => {
+    if (stage === 'gate') root.current.querySelector('.gate .btn')?.focus()
     if (stage !== 'leaving') return
     const tl = gsap.timeline({ onComplete: onEnter })
-    tl.to(root.current.querySelector('.loader-inner'), { y: -40, opacity: 0, duration: 0.5, ease: 'power2.in' })
-    tl.to(root.current, { clipPath: 'inset(0 0 100% 0)', duration: 1.0, ease: 'expo.inOut' }, '-=0.1')
+    tl.to(root.current.querySelector('.loader-inner'), { scale: 0.9, opacity: 0, duration: 0.45, ease: 'power2.in' })
+    tl.to(root.current, { clipPath: 'circle(0% at 50% 50%)', duration: 0.9, ease: 'expo.inOut' }, '-=0.15')
   }, [stage, onEnter])
 
-  const level = Math.min(1, pct / 100)
+  const level = Math.min(100, pct)
   return (
-    <div className="loader" ref={root} role="dialog" aria-modal="true" aria-label="Carregando o site">
+    <div className="loader" ref={root} role="dialog" aria-modal="true" aria-label="Abrindo o site da Cervejaria Gonçalves">
       <div className="loader-inner">
-        <GlassSVG level={level} foam={pct >= 100 ? 1 : 0} className="loader-glass" id="ld" />
+        <div className="seal" aria-hidden="true">
+          <img src={logo} alt="" className="seal-logo" style={{ opacity: level >= 100 ? 1 : 0 }} />
+          <div className="seal-fill">
+            <span className="seal-liquid" style={{ transform: `translateY(${100 - level}%)` }} />
+            <span className="seal-word">
+              GON
+              <br />
+              ÇAL
+              <br />
+              VES
+            </span>
+          </div>
+        </div>
+
         {stage === 'loading' && (
           <p className="loader-pct" aria-live="polite">
-            <span>{Math.round(pct)}</span>
-            <small>Tirando o chope</small>
+            {Math.round(level)}
           </p>
         )}
         {stage === 'gate' && (
@@ -59,25 +74,23 @@ export default function Loader({ onEnter }) {
             <p className="gate-q">Você tem 18 anos ou mais?</p>
             <div className="gate-actions">
               <button
-                className="btn btn--solid"
+                className="btn btn--yellow"
                 onClick={() => {
-                  localStorage.setItem(AGE_KEY, '1')
+                  try {
+                    localStorage.setItem(AGE_KEY, '1')
+                  } catch {}
                   setStage('leaving')
                 }}
               >
-                Sim, quero entrar
+                Sim, entrar
               </button>
-              <button className="btn btn--ghost" onClick={() => setStage('denied')}>
+              <button className="btn btn--line" onClick={() => setStage('denied')}>
                 Ainda não
               </button>
             </div>
           </div>
         )}
-        {stage === 'denied' && (
-          <p className="gate-q gate-denied">
-            Então volte quando fizer 18. A gente guarda um copo pra você.
-          </p>
-        )}
+        {stage === 'denied' && <p className="gate-denied">Volte quando fizer 18. A gente guarda um copo pra você.</p>}
       </div>
     </div>
   )

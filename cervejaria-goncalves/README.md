@@ -1,8 +1,8 @@
-# Cervejaria Gonçalves: site imersivo
+# Cervejaria Gonçalves: site
 
-Site de scroll cinematográfico em 3D. A câmera mergulha no copo, atravessa as bolhas, passa pelos três estilos e pelo processo, sobe até a espuma e termina numa mesa de bar.
+Scrollytelling da Cervejaria Gonçalves (Poços de Caldas, desde 2013).
 
-**Stack:** Vite, React, React Three Fiber, drei, GSAP ScrollTrigger e Lenis.
+**Stack:** Vite, React, GSAP ScrollTrigger e Lenis. Fonte Archivo (largura variável).
 
 ## Rodar
 
@@ -13,31 +13,16 @@ npm run dev      # desenvolvimento
 npm run build    # gera o site estático em ../cervejaria
 ```
 
-O build sai em `/cervejaria` na raiz do repositório, com caminhos relativos, então funciona em qualquer subpasta (GitHub Pages, Netlify, hospedagem comum).
+## Estrutura
 
-## Vídeo real (modo filme)
-
-O fundo pode ser **vídeo real controlado pelo scroll** em vez do 3D:
-
-1. Coloque os vídeos em `footage/` com o nome de cada cena (roteiro em `footage/LEIA-ME.md`).
-2. Rode `npm run film`. O script (ffmpeg) gera as versões desktop e celular em `public/film/` e o `manifest.json`.
-3. Rode `npm run build`.
-
-Enquanto não existir `footage/hero.*`, o site continua usando a cena 3D. Para forçar o 3D, use `?stage=3d` na URL.
-As cenas ficam em `src/film/scenes.js`, e o palco em `src/film/Film.jsx`. Só os vídeos visíveis tocam, e os próximos são pré-carregados em ordem.
-
-## Onde editar
-
-| O quê | Arquivo |
+| Seção | Arquivo |
 | --- | --- |
-| WhatsApp, Instagram, endereço, mapa | `src/lib/config.js` |
-| Textos, ABV e IBU dos estilos | `src/lib/beers.js` |
-| Pontos de venda, segmentos e etapas do processo | `src/components/Sections.jsx` (`PLACES`, `SEGMENTS`, `STEPS`) |
-| Logo (placeholder) | `LogoMark` em `src/components/Sections.jsx` e `glassPrintTexture` / `labelTexture` em `src/three/textures.js` |
-| Cores e tipografia | `src/styles.css` (`:root`) |
+| Abertura (selo enchendo + idade) | `src/components/Loader.jsx` |
+| Abertura: o miolo amarelo vira o selo | `src/components/Hero.jsx` |
+| Manifesto | `src/components/Manifesto.jsx` |
+| O elenco (scroll horizontal) | `src/components/Lineup.jsx` |
+| Embalagens | `src/components/Packs.jsx` |
+| Para o seu negócio + contato | `src/components/Business.jsx` |
 
-## Desempenho
-
-`src/lib/device.js` classifica o aparelho em `high`, `mid`, `low` ou `none` (sem WebGL), usando núcleos, memória, GPU, economia de dados e movimento reduzido. Partículas, transmissão do vidro, antialias e resolução escalam com isso, e o `PerformanceMonitor` rebaixa o nível se o FPS cair. Para testar um nível, use `?tier=low` na URL.
-
-Sem WebGL, o site mostra um copo em SVG e mantém todo o conteúdo.
+Cervejas, textos, cores dos painéis e contatos ficam em `src/data.js` (fonte: Catálogo 2026).
+As imagens ficam em `src/assets/`. Para trocar uma garrafa, substitua o arquivo com o mesmo nome.
