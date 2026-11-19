@@ -26,34 +26,30 @@ Pedidos de ajuste no sistema. Cada item vira um pull request quando for feito.
 
 ### 5. Dois tipos de saída da chopeira: **Alocação** e **Aluguel (evento)**
 O sistema controla três coisas: **assepsia**, **alocação** (fixa no cliente, para revenda) e **aluguel**
-(evento, casamento, festa, normalmente fim de semana). Ao "Enviar para cliente", escolher o tipo:
+(evento, casamento, festa, normalmente fim de semana). Objetivo principal: os **vendedores saberem quais e
+quantas chopeiras estão disponíveis**. Ao "Enviar para cliente", escolher o tipo:
 
-- **Alocação** (fixa, em comodato): a chopeira fica no cliente sem data para voltar. O contrato de comodato
-  **não** entra no sistema; só marcar como alocação. É aqui que existe a **assepsia** recorrente (e a preventiva),
-  pela frequência do cliente, porque é quando a chopeira está em uso no cliente.
+- **Alocação** (fixa, em comodato): fica no cliente sem data para voltar. O contrato de comodato **não** entra no
+  sistema. É aqui que existe a **assepsia** recorrente (e a preventiva), pela frequência do cliente, porque é quando
+  a chopeira está em uso no cliente.
 - **Aluguel / evento** (temporário): ex.: sai na sexta, volta na segunda.
-  - Informar **data de entrega** e **data de retirada**.
+  - Informar **data de saída** e **data prevista de volta**.
   - **Sem assepsia** e sem preventiva recorrente.
-  - **Reserva antecipada**: pode alugar hoje para um evento futuro. A chopeira fica bloqueada nessas datas e o
-    sistema avisa se ela já estiver alugada/reservada no período (contando também o tempo de indisponibilidade
-    depois da volta, abaixo).
-  - **Entrega e retirada são sempre feitas pela Logística**: viram compromissos na agenda da logística, aparecem
-    nos alertas se atrasarem e entram nos avisos de WhatsApp do dia anterior.
-  - **Cliente simples** para eventos: cadastro rápido só com nome, telefone, cidade e endereço do evento
-    (sem vendedor obrigatório e sem frequências).
+  - **Reserva antecipada**: pode reservar hoje para um evento futuro. A chopeira fica bloqueada nessas datas e o
+    sistema avisa se ela já estiver alugada/reservada no período.
+  - **Cliente simples** para eventos: cadastro rápido só com nome, telefone e cidade.
   - **Sem valor de aluguel, caução ou contrato** no sistema.
-  - **Em preparação depois da volta**: quando a logística marca "Retirada", a chopeira entra em
-    **"Em preparação"** e **não conta como disponível** até o **técnico que preparou apontar "Pronta"**.
-    Não há prazo fixo em dias.
-    - O técnico vê na agenda dele a lista **"Chopeiras para preparar"** (mais antigas primeiro).
-    - Ao apontar "Pronta": checklist de preparo, observações e fotos opcionais. Fica no histórico quem preparou e quando.
-    - Se encontrar defeito, o técnico pode mandar direto para **Em manutenção** em vez de "Pronta".
-    - Reserva de evento para uma chopeira ainda em preparação: o sistema avisa que ela ainda não está pronta.
-    - Alerta no painel para chopeiras paradas em preparação há muitos dias.
-- Novo perfil de usuário **Logística**: vê a agenda de entregas e retiradas (por dia e por cidade, com Maps),
-  marca "Entregue" e "Retirada" (isso muda o status da chopeira) e vê o estoque. Não mexe em clientes nem em assepsia.
-- Painel e estoque separam **Em cliente (alocação)**, **Em aluguel**, **Reservada para evento** e
-  **Em preparação**.
+  - **Sem logística no sistema**: não há agenda de entrega/retirada nem perfil novo. Só um alerta discreto se a
+    data prevista de volta passou e a chopeira ainda consta como alugada.
+- **Volta do aluguel → "Em limpeza" → técnico aponta "Pronta"**
+  - Quando a chopeira volta, registra-se a devolução (botão "Devolver" que já existe) e ela entra em
+    **"Em limpeza"**: **não conta como disponível** para os vendedores.
+  - O técnico vê a lista **"Chopeiras para limpar"** e, depois de limpar, aponta **"Pronta"** (fica no histórico
+    quem limpou e quando). Aí ela volta a contar como disponível.
+  - Se achar defeito, manda para **Em manutenção** em vez de "Pronta".
+  - Alerta no painel para chopeira parada em limpeza há muitos dias.
+- Painel e estoque mostram separado: **Disponíveis**, **Em cliente (alocação)**, **Em aluguel**,
+  **Reservadas para evento**, **Em limpeza** e **Em manutenção**.
 - Relatórios: ocupação por alocação e por aluguel; quantidade de aluguéis no período.
 
 ### 4. Apagar os dados de exemplo
