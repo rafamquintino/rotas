@@ -4,11 +4,25 @@ import { redirect } from 'next/navigation';
 import { createClient } from './supabase/server';
 import type { Perfil, Usuario } from './types';
 
-/** Usuário logado + perfil (cacheado por requisição). */
+/** Lê o "sub" do token da sessão sem ir à rede. */
+function subDoToken(token?: string): string | null {
+  try {
+    const payload = JSON.parse(Buffer.from(token!.split('.')[1], 'base64url').toString());
+    return payload.exp * 1000 > Date.now() ? payload.sub : null;
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Usuário logado + perfil (cacheado por requisição).
+ * O token já foi validado pelo middleware nesta mesma requisição e o banco valida de novo em cada
+ * consulta (RLS), então aqui não repetimos a ida ao servidor de autenticação.
+ */
 export const getUsuario = cache(async (): Promise<Usuario> => {
   const supabase = await createClient();
-  const { data: claims } = await supabase.auth.getClaims();
-  const uid = claims?.claims?.sub;
+  const { data: s } = await supabase.auth.getSession();
+  const uid = subDoToken(s.session?.access_token);
   if (!uid) redirect('/login');
   const { data } = await supabase.from('usuarios').select('*').eq('id', uid).single();
   if (!data || !data.ativo) redirect('/login?erro=inativo');
