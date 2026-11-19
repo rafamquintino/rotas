@@ -42,13 +42,18 @@ O sistema controla três coisas: **assepsia**, **alocação** (fixa no cliente, 
   - **Cliente simples** para eventos: cadastro rápido só com nome, telefone, cidade e endereço do evento
     (sem vendedor obrigatório e sem frequências).
   - **Sem valor de aluguel, caução ou contrato** no sistema.
-  - **Indisponível depois da volta**: quando a chopeira volta do aluguel, fica **indisponível por um tempo**
-    (ex.: limpeza e conferência) e só depois volta a contar como disponível. Mostrar "Indisponível até dd/mm"
-    no estoque e liberar sozinha na data. A definir: quantos dias (padrão) e se pode ser ajustado em cada volta.
+  - **Em preparação depois da volta**: quando a logística marca "Retirada", a chopeira entra em
+    **"Em preparação"** e **não conta como disponível** até o **técnico que preparou apontar "Pronta"**.
+    Não há prazo fixo em dias.
+    - O técnico vê na agenda dele a lista **"Chopeiras para preparar"** (mais antigas primeiro).
+    - Ao apontar "Pronta": checklist de preparo, observações e fotos opcionais. Fica no histórico quem preparou e quando.
+    - Se encontrar defeito, o técnico pode mandar direto para **Em manutenção** em vez de "Pronta".
+    - Reserva de evento para uma chopeira ainda em preparação: o sistema avisa que ela ainda não está pronta.
+    - Alerta no painel para chopeiras paradas em preparação há muitos dias.
 - Novo perfil de usuário **Logística**: vê a agenda de entregas e retiradas (por dia e por cidade, com Maps),
   marca "Entregue" e "Retirada" (isso muda o status da chopeira) e vê o estoque. Não mexe em clientes nem em assepsia.
 - Painel e estoque separam **Em cliente (alocação)**, **Em aluguel**, **Reservada para evento** e
-  **Indisponível (retorno)**.
+  **Em preparação**.
 - Relatórios: ocupação por alocação e por aluguel; quantidade de aluguéis no período.
 
 ### 4. Apagar os dados de exemplo
