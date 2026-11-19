@@ -24,10 +24,11 @@ Pedidos de ajuste no sistema. Cada item vira um pull request quando for feito.
 - Objetivo: reconhecer a chopeira pelas fotos e registrar o estado dela.
 - A definir: se, além das fotos, entra um campo de **condição** (ex.: ótima, boa, regular, ruim).
 
-### 5. Dois tipos de saída da chopeira: **Alocação** e **Aluguel (evento)**
+### 4. Dois tipos de saída da chopeira: **Alocação** e **Aluguel (evento)**
 O sistema controla três coisas: **assepsia**, **alocação** (fixa no cliente, para revenda) e **aluguel**
 (evento, casamento, festa, normalmente fim de semana). Objetivo principal: os **vendedores saberem quais e
-quantas chopeiras estão disponíveis**. Ao "Enviar para cliente", escolher entre alocação (com cliente) e aluguel (sem cliente):
+quantas chopeiras estão disponíveis**. Na ficha da chopeira, dois botões: **"Alocar em cliente"** (o atual
+"Enviar para cliente") e **"Alugar"**:
 
 - **Alocação** (fixa, em comodato): fica no cliente sem data para voltar. O contrato de comodato **não** entra no
   sistema. É aqui que existe a **assepsia** recorrente (e a preventiva), pela frequência do cliente, porque é quando
@@ -54,7 +55,7 @@ quantas chopeiras estão disponíveis**. Ao "Enviar para cliente", escolher entr
   **Reservadas para evento**, **Em limpeza** e **Em manutenção**.
 - Relatórios: ocupação por alocação e por aluguel; quantidade de aluguéis no período.
 
-### 4. Apagar os dados de exemplo
+### 5. Apagar os dados de exemplo
 - Remover as 28 chopeiras e os 10 clientes de exemplo (CH-0001…) quando entrarem os dados reais.
 
 ## Feitas
