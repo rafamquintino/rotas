@@ -1,0 +1,73 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Cores da Cervejaria Gonçalves (âmbar, cevada, malte e creme) */
+:root {
+  --fundo: 250 245 236;
+  --superficie: 255 255 255;
+  --borda: 232 220 200;
+  --texto: 42 26 8;
+  --suave: 120 100 78;
+  --marca: 186 117 23;
+  --marca-forte: 133 79 11;
+  --cevada: 245 200 50;
+  --malte: 59 32 0;
+  --ok: 46 125 50;
+  --alerta: 196 120 0;
+  --perigo: 198 40 40;
+  --info: 21 101 192;
+  color-scheme: light;
+}
+
+[data-theme='dark'] {
+  --fundo: 20 15 10;
+  --superficie: 34 27 20;
+  --borda: 62 50 38;
+  --texto: 245 236 221;
+  --suave: 176 158 136;
+  --marca: 232 158 52;
+  --marca-forte: 245 190 90;
+  --cevada: 245 200 50;
+  --malte: 12 8 4;
+  --ok: 102 187 106;
+  --alerta: 255 179 0;
+  --perigo: 239 83 80;
+  --info: 100 160 240;
+  color-scheme: dark;
+}
+
+html { -webkit-tap-highlight-color: transparent; }
+body {
+  @apply bg-fundo text-texto antialiased;
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+@layer components {
+  .cartao { @apply rounded-2xl border border-borda bg-superficie p-4 shadow-sm; }
+  .btn {
+    @apply inline-flex min-h-[48px] items-center justify-center gap-2 rounded-xl px-4 text-base font-semibold
+           transition active:scale-[0.98] disabled:opacity-50 disabled:active:scale-100;
+  }
+  .btn-primario { @apply btn bg-marca text-white shadow-sm hover:bg-marca-forte dark:text-malte; }
+  .btn-secundario { @apply btn border border-borda bg-superficie text-texto hover:bg-fundo; }
+  .btn-perigo { @apply btn bg-perigo text-white; }
+  .btn-ok { @apply btn bg-ok text-white; }
+  .campo {
+    @apply block min-h-[48px] w-full rounded-xl border border-borda bg-superficie px-3 text-base text-texto
+           placeholder:text-suave/70 focus:border-marca focus:outline-none focus:ring-2 focus:ring-marca/30;
+  }
+  textarea.campo { @apply py-3; }
+  .rotulo { @apply mb-1 block text-sm font-medium text-suave; }
+  .titulo { @apply text-xl font-bold tracking-tight; }
+  .chip {
+    @apply inline-flex min-h-[40px] shrink-0 items-center rounded-full border border-borda bg-superficie px-3 text-sm font-medium;
+  }
+  .chip-ativo { @apply border-marca bg-marca/15 text-marca-forte; }
+  .tabela { @apply w-full text-left text-sm; }
+  .tabela th { @apply border-b border-borda px-2 py-2 font-semibold text-suave; }
+  .tabela td { @apply border-b border-borda/60 px-2 py-2; }
+}
+
+.scroll-x { overflow-x: auto; scrollbar-width: none; }
+.scroll-x::-webkit-scrollbar { display: none; }
