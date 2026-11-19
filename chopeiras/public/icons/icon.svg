@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <rect width="512" height="512" rx="112" fill="#3B2000"/>
+  <!-- torneira da chopeira -->
+  <rect x="150" y="92" width="212" height="46" rx="16" fill="#BA7517"/>
+  <rect x="236" y="138" width="40" height="50" fill="#BA7517"/>
+  <rect x="300" y="60" width="26" height="70" rx="10" fill="#f5c832"/>
+  <!-- copo -->
+  <path d="M170 214h172l-20 214a24 24 0 0 1-24 22h-84a24 24 0 0 1-24-22z" fill="#f5c832"/>
+  <path d="M170 214h172l-4 44H174z" fill="#FFF8F0"/>
+  <circle cx="200" cy="214" r="30" fill="#FFF8F0"/>
+  <circle cx="252" cy="204" r="36" fill="#FFF8F0"/>
+  <circle cx="306" cy="214" r="30" fill="#FFF8F0"/>
+  <rect x="210" y="300" width="14" height="110" rx="7" fill="#BA7517" opacity=".45"/>
+</svg>
