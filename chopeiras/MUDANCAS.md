@@ -27,23 +27,25 @@ Pedidos de ajuste no sistema. Cada item vira um pull request quando for feito.
 ### 5. Dois tipos de saída da chopeira: **Alocação** e **Aluguel (evento)**
 O sistema controla três coisas: **assepsia**, **alocação** (fixa no cliente, para revenda) e **aluguel**
 (evento, casamento, festa, normalmente fim de semana). Objetivo principal: os **vendedores saberem quais e
-quantas chopeiras estão disponíveis**. Ao "Enviar para cliente", escolher o tipo:
+quantas chopeiras estão disponíveis**. Ao "Enviar para cliente", escolher entre alocação (com cliente) e aluguel (sem cliente):
 
 - **Alocação** (fixa, em comodato): fica no cliente sem data para voltar. O contrato de comodato **não** entra no
   sistema. É aqui que existe a **assepsia** recorrente (e a preventiva), pela frequência do cliente, porque é quando
   a chopeira está em uso no cliente.
-- **Aluguel / evento** (temporário): ex.: sai na sexta, volta na segunda.
+- **Aluguel / evento** (temporário, botão próprio "Alugar"): ex.: sai na sexta, volta na segunda.
   - Informar **data de saída** e **data prevista de volta**.
   - **Sem assepsia** e sem preventiva recorrente.
+  - **Sem cliente**: o aluguel não pede cadastro de cliente. Só marca que a chopeira está alugada, com as datas
+    (e um campo de observação opcional, ex.: "Casamento sábado").
   - **Reserva antecipada**: pode reservar hoje para um evento futuro. A chopeira fica bloqueada nessas datas e o
     sistema avisa se ela já estiver alugada/reservada no período.
-  - **Cliente simples** para eventos: cadastro rápido só com nome, telefone e cidade.
   - **Sem valor de aluguel, caução ou contrato** no sistema.
   - **Sem logística no sistema**: não há agenda de entrega/retirada nem perfil novo. Só um alerta discreto se a
     data prevista de volta passou e a chopeira ainda consta como alugada.
 - **Volta do aluguel → "Em limpeza" → técnico aponta "Pronta"**
   - Quando a chopeira volta, registra-se a devolução (botão "Devolver" que já existe) e ela entra em
-    **"Em limpeza"**: **não conta como disponível** para os vendedores.
+    **"Em limpeza"**: **não conta como disponível** para os vendedores. Depois de "Pronta", fica disponível de novo
+    tanto para **alocação** quanto para **aluguel**.
   - O técnico vê a lista **"Chopeiras para limpar"** e, depois de limpar, aponta **"Pronta"** (fica no histórico
     quem limpou e quando). Aí ela volta a contar como disponível.
   - Se achar defeito, manda para **Em manutenção** em vez de "Pronta".
