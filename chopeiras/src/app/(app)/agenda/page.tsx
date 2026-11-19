@@ -94,7 +94,7 @@ export default async function Agenda({ searchParams }: { searchParams: Promise<P
         <div className="flex items-center gap-2">
           <Link href={qs({ data: somaDias(data, -passo) })} className="btn-secundario px-4" aria-label="Anterior">‹</Link>
           <div className="flex-1 text-center">
-            <div className="font-bold capitalize">
+            <div className="font-bold first-letter:uppercase">
               {vista === 'dia' ? fmtDiaSemana(data) : `${fmtData(ini).slice(0, 5)} a ${fmtData(fim).slice(0, 5)}`}
             </div>
             {data !== hj && <Link href={qs({ data: hj })} className="text-xs font-semibold text-marca">voltar para hoje</Link>}
@@ -113,7 +113,7 @@ export default async function Agenda({ searchParams }: { searchParams: Promise<P
       {grupos.length === 0 ? <Vazio>Nenhum serviço {vista === 'lista' ? 'pendente' : 'neste período'}.</Vazio> : grupos.map((g) => (
         <section key={g.titulo} className="flex flex-col gap-2">
           <h2 className="flex items-center gap-2 text-sm font-bold uppercase tracking-wide text-suave">
-            <span className="capitalize">{g.titulo}</span>
+            <span className="first-letter:uppercase">{g.titulo}</span>
             {g.sub && <Selo cor="marca">{g.sub}</Selo>}
             <span className="ml-auto">{g.itens.length}</span>
           </h2>

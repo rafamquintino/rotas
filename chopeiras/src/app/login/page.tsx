@@ -14,6 +14,16 @@ export default async function Login({ searchParams }: { searchParams: Promise<{ 
       <div className="rounded-t-3xl bg-fundo px-6 pb-10 pt-8" style={{ paddingBottom: 'max(2.5rem, env(safe-area-inset-bottom))' }}>
         <div className="mx-auto max-w-sm">
           <FormLogin erroInicial={erro === 'inativo' ? 'Seu acesso está inativo. Fale com o gestor.' : undefined} />
+          {process.env.NEXT_PUBLIC_SUPABASE_URL === 'mesma-origem' && (
+            <div className="mt-6 rounded-xl border border-dashed border-marca/50 p-3 text-sm text-suave">
+              <b className="text-texto">Modo demonstração</b> · senha <b>demo1234</b>
+              <ul className="mt-1">
+                <li>Gestor: gestor@demo.com</li>
+                <li>Vendedor: vendedor@demo.com</li>
+                <li>Técnico: tecnico@demo.com</li>
+              </ul>
+            </div>
+          )}
         </div>
       </div>
     </main>

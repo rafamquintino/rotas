@@ -90,7 +90,7 @@ export default async function NovaAssepsia({ searchParams }: { searchParams: Pro
         <div className="rounded-xl bg-marca/10 p-4 text-center">
           <div className="text-sm text-suave">{TIPO_SERVICO[tipo as keyof typeof TIPO_SERVICO]?.label ?? 'Assepsia'}</div>
           <div className="text-lg font-bold">{cliente.nome}</div>
-          <div className="font-semibold capitalize text-marca-forte">{fmtDiaSemana(sp.data)}</div>
+          <div className="font-semibold text-marca-forte first-letter:uppercase">{fmtDiaSemana(sp.data)}</div>
         </div>
         {(chs ?? []).length > 1 && (
           <div>

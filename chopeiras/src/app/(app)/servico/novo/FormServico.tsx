@@ -1,6 +1,7 @@
 'use client';
 import { useMemo, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import { comprimirImagem, enfileirar, enviarServico, type ServicoPendente } from '@/lib/offline';
 import { Assinatura } from '@/components/Assinatura';
 import { CHECKLIST, TIPO_SERVICO } from '@/lib/format';
@@ -58,7 +59,7 @@ export function FormServico({ tecnicoId, cliente, chopeiras, agendamento }: Prop
   const [antes, setAntes] = useState<Blob[]>([]);
   const [depois, setDepois] = useState<Blob[]>([]);
   const [assinatura, setAssinatura] = useState<Blob | null>(null);
-  const [estado, setEstado] = useState<'' | 'enviando' | 'erro'>('');
+  const [estado, setEstado] = useState<'' | 'enviando' | 'erro' | 'salvo-offline'>('');
   const [msg, setMsg] = useState('');
   const itens = CHECKLIST[tipo];
 
@@ -90,12 +91,27 @@ export function FormServico({ tecnicoId, cliente, chopeiras, agendamento }: Prop
       // Sem sinal (ou falha de rede): guarda no aparelho e sincroniza depois
       try {
         await enfileirar(s);
-        router.push(`/agenda?ok=${encodeURIComponent('Sem conexão: serviço salvo no aparelho e será enviado quando o sinal voltar.')}`);
+        setEstado('salvo-offline'); // sem sinal não dá para trocar de tela com segurança: confirma aqui mesmo
+        window.scrollTo(0, 0);
       } catch (e) {
         setEstado('erro');
         setMsg('Não foi possível salvar: ' + (e as Error).message);
       }
     }
+  }
+
+  if (estado === 'salvo-offline') {
+    return (
+      <div className="cartao flex flex-col gap-3 text-center">
+        <div className="text-5xl">📶</div>
+        <h2 className="text-lg font-bold">Salvo no aparelho</h2>
+        <p className="text-sm text-suave">
+          Sem conexão agora. O serviço de <b>{cliente.nome}</b> será enviado sozinho quando o sinal voltar.
+        </p>
+        <Link href="/servico/pendentes" className="btn-secundario">Ver serviços aguardando envio</Link>
+        <Link href="/agenda" className="btn-primario">Voltar à agenda</Link>
+      </div>
+    );
   }
 
   return (

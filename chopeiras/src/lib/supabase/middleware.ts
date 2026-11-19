@@ -1,5 +1,6 @@
 import { createServerClient } from '@supabase/ssr';
 import { NextResponse, type NextRequest } from 'next/server';
+import { COOKIE_SESSAO, urlServidor } from './config';
 
 const PUBLICAS = ['/login', '/offline', '/api/notificacoes', '/auth/callback'];
 
@@ -7,9 +8,10 @@ export async function updateSession(request: NextRequest) {
   let response = NextResponse.next({ request });
 
   const supabase = createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    urlServidor(),
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
     {
+      cookieOptions: COOKIE_SESSAO,
       cookies: {
         getAll: () => request.cookies.getAll(),
         setAll: (list) => {

@@ -31,6 +31,19 @@ assepsia e manutenção preventiva por cliente, com histórico completo. Usado p
 
 Rodar local: `cp .env.example .env.local` (preencha), `npm install`, `npm run dev`.
 
+## Ver sem criar conta (modo demonstração)
+
+`bash demo/iniciar.sh` sobe tudo localmente (precisa de Node e PostgreSQL instalados): um Postgres com dados de
+exemplo e um servidor que imita o Supabase (`demo/supabase-falso.mjs`, com RLS de verdade). Abra http://localhost:3000.
+
+| Perfil | E-mail | Senha |
+| --- | --- | --- |
+| Gestor | gestor@demo.com | demo1234 |
+| Vendedor | vendedor@demo.com (ou vendedora@demo.com) | demo1234 |
+| Técnico | tecnico@demo.com | demo1234 |
+
+Para zerar os dados, apague `demo/.dados`. Só para demonstração: não use em produção.
+
 ## Perfis e segurança
 
 As permissões ficam **no banco (RLS + triggers)**, não só na tela:
