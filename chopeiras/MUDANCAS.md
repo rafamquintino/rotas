@@ -13,7 +13,11 @@ Pedidos de ajuste no sistema. Cada item vira um pull request quando for feito.
 ### 2. Leitura do código de barras do patrimônio pela câmera do celular
 - Botão "Ler patrimônio" que abre a câmera e reconhece a etiqueta.
 - Onde usar: busca do Estoque (abre a ficha da chopeira), envio para cliente e registro de serviço (confirma que é a chopeira certa).
-- A definir: tipo do código de barras (precisa de uma foto da etiqueta) e se o código de barras contém o mesmo número de 4 dígitos.
+- Etiqueta conferida (foto de 19/11/2026): **Code 128**, e as barras contêm o mesmo número impresso (ex.: `0878`).
+- Funcionar no Android (Chrome) e no iPhone (Safari). O iPhone não tem leitor de código de barras nativo no navegador,
+  então o app precisa de um leitor próprio (biblioteca leve, carregada só quando o botão é tocado).
+- A foto de teste estava pouco nítida e só foi lida depois de recortada: na tela de leitura, mostrar uma moldura para
+  enquadrar a etiqueta, ligar a lanterna e oferecer a opção de digitar o número.
 
 ### 3. Até 5 fotos no cadastro da chopeira
 - Poder anexar até 5 fotos já no cadastro (hoje as fotos só entram depois, pela ficha).
