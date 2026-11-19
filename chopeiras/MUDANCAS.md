@@ -24,26 +24,32 @@ Pedidos de ajuste no sistema. Cada item vira um pull request quando for feito.
 - Objetivo: reconhecer a chopeira pelas fotos e registrar o estado dela.
 - A definir: se, além das fotos, entra um campo de **condição** (ex.: ótima, boa, regular, ruim).
 
-### 5. Dois tipos de saída da chopeira: **Comodato** e **Aluguel (evento)**
-Ao "Enviar para cliente", escolher o tipo:
+### 5. Dois tipos de saída da chopeira: **Alocação** e **Aluguel (evento)**
+O sistema controla três coisas: **assepsia**, **alocação** (fixa no cliente, para revenda) e **aluguel**
+(evento, casamento, festa, normalmente fim de semana). Ao "Enviar para cliente", escolher o tipo:
 
-- **Comodato** (definitivo): a chopeira fica no cliente sem data para voltar. É o que o sistema já faz hoje:
-  agenda assepsia e preventiva recorrentes pela frequência do cliente. O contrato de comodato **não** entra no sistema;
-  só marcar que é comodato.
-- **Aluguel / evento** (temporário): ex.: o cliente pega na sexta para um evento e devolve na segunda.
-  - Informar **data de saída** e **data de retirada**.
-  - A retirada vira um compromisso na agenda (ex.: "Retirar CH-0878 – Bar X – segunda"), aparece nos alertas
-    se passar da data e entra nos avisos de WhatsApp do dia anterior.
-  - Não gera assepsia/preventiva recorrente (é curto). Ver abaixo se a assepsia é feita na volta.
-  - A chopeira aparece como **"Em aluguel"**, separada de "Em cliente (comodato)", nos cards e no estoque.
-- Relatórios: separar ocupação por comodato e por aluguel; quantos aluguéis no período.
-- A definir:
-  - Reserva antecipada: alugar hoje para um evento daqui a 15 dias, bloqueando a chopeira nessas datas
-    (o sistema avisa se ela já estiver reservada/alugada no período)?
-  - Quem faz a entrega e a retirada (técnico, vendedor ou outra pessoa)?
-  - Na volta do aluguel, a assepsia é obrigatória antes de liberar a chopeira para o estoque?
-  - Cliente de aluguel é cadastrado igual ao de comodato, ou pode ser um "cliente avulso" (pessoa física, evento)?
-  - Valor do aluguel / caução entra no sistema ou fica de fora (como o contrato)?
+- **Alocação** (fixa, em comodato): a chopeira fica no cliente sem data para voltar. O contrato de comodato
+  **não** entra no sistema; só marcar como alocação. É aqui que existe a **assepsia** recorrente (e a preventiva),
+  pela frequência do cliente, porque é quando a chopeira está em uso no cliente.
+- **Aluguel / evento** (temporário): ex.: sai na sexta, volta na segunda.
+  - Informar **data de entrega** e **data de retirada**.
+  - **Sem assepsia** e sem preventiva recorrente.
+  - **Reserva antecipada**: pode alugar hoje para um evento futuro. A chopeira fica bloqueada nessas datas e o
+    sistema avisa se ela já estiver alugada/reservada no período (contando também o tempo de indisponibilidade
+    depois da volta, abaixo).
+  - **Entrega e retirada são sempre feitas pela Logística**: viram compromissos na agenda da logística, aparecem
+    nos alertas se atrasarem e entram nos avisos de WhatsApp do dia anterior.
+  - **Cliente simples** para eventos: cadastro rápido só com nome, telefone, cidade e endereço do evento
+    (sem vendedor obrigatório e sem frequências).
+  - **Sem valor de aluguel, caução ou contrato** no sistema.
+  - **Indisponível depois da volta**: quando a chopeira volta do aluguel, fica **indisponível por um tempo**
+    (ex.: limpeza e conferência) e só depois volta a contar como disponível. Mostrar "Indisponível até dd/mm"
+    no estoque e liberar sozinha na data. A definir: quantos dias (padrão) e se pode ser ajustado em cada volta.
+- Novo perfil de usuário **Logística**: vê a agenda de entregas e retiradas (por dia e por cidade, com Maps),
+  marca "Entregue" e "Retirada" (isso muda o status da chopeira) e vê o estoque. Não mexe em clientes nem em assepsia.
+- Painel e estoque separam **Em cliente (alocação)**, **Em aluguel**, **Reservada para evento** e
+  **Indisponível (retorno)**.
+- Relatórios: ocupação por alocação e por aluguel; quantidade de aluguéis no período.
 
 ### 4. Apagar os dados de exemplo
 - Remover as 28 chopeiras e os 10 clientes de exemplo (CH-0001…) quando entrarem os dados reais.
