@@ -2,12 +2,15 @@ import Link from 'next/link';
 import { getUsuario } from '@/lib/auth';
 import { Navegacao } from '@/components/Navegacao';
 import { StatusConexao } from '@/components/StatusConexao';
+import { BarraCarregando } from '@/components/BarraCarregando';
+import { Suspense } from 'react';
 import { PERFIL } from '@/lib/format';
 
 export default async function AppLayout({ children }: { children: React.ReactNode }) {
   const u = await getUsuario();
   return (
     <div className="min-h-dvh pb-24">
+      <Suspense fallback={null}><BarraCarregando /></Suspense>
       <header className="sticky top-0 z-20 bg-malte text-white" style={{ paddingTop: 'env(safe-area-inset-top)' }}>
         <div className="mx-auto flex h-14 max-w-2xl items-center gap-3 px-4">
           <Link href="/" className="flex items-center gap-2">

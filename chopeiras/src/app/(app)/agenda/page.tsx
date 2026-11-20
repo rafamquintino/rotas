@@ -44,7 +44,12 @@ export default async function Agenda({ searchParams }: { searchParams: Promise<P
   if (sp.cidade) q = q.eq('cidade', sp.cidade);
   if (sp.meus && u.perfil === 'tecnico') q = q.or(`tecnico_id.eq.${u.id},tecnico_id.is.null`);
 
-  const { data: rows } = await q;
+  const [{ data: rows }, { count: paraLimpar }] = await Promise.all([
+    q,
+    u.perfil !== 'vendedor'
+      ? sb.from('chopeiras').select('id', { count: 'exact', head: true }).eq('status', 'em_limpeza').eq('ativo', true)
+      : Promise.resolve({ count: 0 }),
+  ]);
   const ags = (rows ?? []) as Agendamento[];
   const cidades = [...new Set(ags.map((a) => a.cidade))].sort();
   const params = { ...sp } as Record<string, string | undefined>;
@@ -83,6 +88,12 @@ export default async function Agenda({ searchParams }: { searchParams: Promise<P
         {u.perfil !== 'tecnico' && <Link href="/agenda/nova" className="btn-primario min-h-[44px] px-3 text-sm">+ Agendar</Link>}
       </div>
       <Flash ok={sp.ok} erro={sp.erro} />
+      {(paraLimpar ?? 0) > 0 && (
+        <Link href="/chopeiras?status=em_limpeza" className="cartao flex items-center justify-between border-ciano/40 py-3">
+          <span><b>🧽 Chopeiras para limpar</b><span className="block text-xs text-suave">voltaram do aluguel e aguardam limpeza</span></span>
+          <Selo cor="ciano">{paraLimpar}</Selo>
+        </Link>
+      )}
 
       <div className="grid grid-cols-3 gap-1 rounded-xl bg-borda/50 p-1">
         {[['dia', 'Dia'], ['semana', 'Semana'], ['lista', 'Lista']].map(([v, l]) => (

@@ -17,7 +17,7 @@ export default async function Editar({ params, searchParams }: { params: Promise
   if (!c) notFound();
   return (
     <>
-      <Cabecalho titulo={`Editar ${c.codigo}`} voltar={`/chopeiras/${id}`} />
+      <Cabecalho titulo={`Editar ${c.patrimonio ?? c.rotulo}`} voltar={`/chopeiras/${id}`} />
       <Flash erro={sp.erro} />
       <FormChopeira c={c as Chopeira} modelos={(modelos ?? []) as Modelo[]} />
     </>

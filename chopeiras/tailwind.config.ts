@@ -21,6 +21,8 @@ export default {
         alerta: v('alerta'),
         perigo: v('perigo'),
         info: v('info'),
+        roxo: v('roxo'),
+        ciano: v('ciano'),
       },
       fontFamily: { sans: ['var(--fonte)', 'system-ui', 'sans-serif'] },
       borderRadius: { xl: '0.875rem', '2xl': '1.125rem' },

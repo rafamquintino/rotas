@@ -81,6 +81,10 @@ const pega = (l: Linha, ...nomes: string[]) => {
   return '';
 };
 const normMarca = (m: string) => (/gor/i.test(m) ? 'Gorillaz' : /gon/i.test(m) ? 'Gonçalves' : '');
+const normCondicao = (c: string) => {
+  const t = c.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+  return ['otima', 'boa', 'regular', 'ruim'].includes(t) ? t : null;
+};
 const normVolt = (v: string) => (/110|127/.test(v) ? '110V' : /220/.test(v) ? '220V' : '');
 
 export async function importarCsv(tipo: 'chopeiras' | 'clientes' | 'usuarios', linhas: Linha[]): Promise<ResultadoImport> {
@@ -102,7 +106,8 @@ export async function importarCsv(tipo: 'chopeiras' | 'clientes' | 'usuarios', l
       const modelo = pega(l, 'modelo');
       const cap = pega(l, 'capacidade_lph', 'capacidade', 'litros_hora').replace(',', '.');
       return {
-        ...(pega(l, 'codigo', 'código') ? { codigo: pega(l, 'codigo', 'código').toUpperCase() } : {}),
+        patrimonio: pega(l, 'patrimonio', 'patrimônio') ? pega(l, 'patrimonio', 'patrimônio').padStart(4, '0') : null,
+        condicao: normCondicao(pega(l, 'condicao', 'condição')),
         numero_serie: pega(l, 'numero_serie', 'serie', 'série', 'nº série') || null,
         marca, voltagem, vias,
         modelo_id: modelos?.find((m) => m.nome.toLowerCase() === modelo.toLowerCase())?.id ?? null,
@@ -113,7 +118,7 @@ export async function importarCsv(tipo: 'chopeiras' | 'clientes' | 'usuarios', l
     for (const r of registros) {
       if (!r) continue;
       const { error } = await sb.from('chopeiras').insert(r);
-      if (error) erros.push(`${r.codigo ?? r.numero_serie ?? 'chopeira'}: ${erroMsg(error)}`); else ok++;
+      if (error) erros.push(`${r.patrimonio ?? r.numero_serie ?? 'chopeira'}: ${erroMsg(error)}`); else ok++;
     }
   }
 

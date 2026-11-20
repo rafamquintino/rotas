@@ -4,13 +4,14 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { comprimirImagem, enfileirar, enviarServico, type ServicoPendente } from '@/lib/offline';
 import { Assinatura } from '@/components/Assinatura';
+import { BotaoLerPatrimonio } from '@/components/LeitorPatrimonio';
 import { CHECKLIST, TIPO_SERVICO } from '@/lib/format';
 import type { TipoServico } from '@/lib/types';
 
 interface Props {
   tecnicoId: string;
   cliente: { id: string; nome: string; cidade: string };
-  chopeiras: { id: string; codigo: string }[];
+  chopeiras: { id: string; rotulo: string; patrimonio: string | null }[];
   agendamento: { id: string; tipo: TipoServico; chopeira_id: string | null } | null;
 }
 
@@ -61,6 +62,7 @@ export function FormServico({ tecnicoId, cliente, chopeiras, agendamento }: Prop
   const [assinatura, setAssinatura] = useState<Blob | null>(null);
   const [estado, setEstado] = useState<'' | 'enviando' | 'erro' | 'salvo-offline'>('');
   const [msg, setMsg] = useState('');
+  const [conferencia, setConferencia] = useState<{ ok: boolean; texto: string } | null>(null);
   const itens = CHECKLIST[tipo];
 
   async function concluir() {
@@ -122,17 +124,35 @@ export function FormServico({ tecnicoId, cliente, chopeiras, agendamento }: Prop
           <div className="text-sm text-suave">{cliente.cidade}</div>
         </div>
         <div className="grid grid-cols-3 gap-2">
-          {(Object.keys(TIPO_SERVICO) as TipoServico[]).map((t) => (
+          {(Object.keys(TIPO_SERVICO) as TipoServico[]).filter((t) => t !== 'limpeza').map((t) => (
             <button key={t} type="button" onClick={() => setTipo(t)} className={`chip justify-center text-center ${tipo === t ? 'chip-ativo' : ''}`}>
               {TIPO_SERVICO[t].curto}
             </button>
           ))}
         </div>
         {chopeiras.length > 0 && (
-          <select value={chopeira} onChange={(e) => setChopeira(e.target.value)} className="campo">
-            <option value="">Todas as chopeiras do cliente</option>
-            {chopeiras.map((c) => <option key={c.id} value={c.id}>{c.codigo}</option>)}
-          </select>
+          <div className="flex gap-2">
+            <select value={chopeira} onChange={(e) => { setChopeira(e.target.value); setConferencia(null); }} className="campo" aria-label="Chopeira">
+              <option value="">Todas as chopeiras do cliente</option>
+              {chopeiras.map((c) => <option key={c.id} value={c.id}>{c.rotulo}</option>)}
+            </select>
+            <BotaoLerPatrimonio
+              rotulo="📷"
+              className="btn-secundario px-4"
+              onLer={(p) => {
+                const achada = chopeiras.find((c) => c.patrimonio === p);
+                if (achada) {
+                  setChopeira(achada.id);
+                  setConferencia({ ok: true, texto: `✓ Patrimônio ${p} confere: chopeira deste cliente.` });
+                } else {
+                  setConferencia({ ok: false, texto: `✗ O patrimônio ${p} não está alocado em ${cliente.nome}. Confira a chopeira.` });
+                }
+              }}
+            />
+          </div>
+        )}
+        {conferencia && (
+          <p className={`rounded-xl p-3 text-sm font-semibold ${conferencia.ok ? 'bg-ok/15 text-ok' : 'bg-perigo/15 text-perigo'}`}>{conferencia.texto}</p>
         )}
       </section>
 

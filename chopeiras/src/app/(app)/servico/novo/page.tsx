@@ -21,7 +21,7 @@ export default async function NovoServico({ searchParams }: { searchParams: Prom
 
   const [{ data: cliente }, { data: chs }] = await Promise.all([
     sb.from('clientes').select('id, nome, cidade').eq('id', clienteId).single(),
-    sb.from('chopeiras').select('id, codigo').eq('cliente_id', clienteId).order('codigo'),
+    sb.from('chopeiras').select('id, rotulo, patrimonio').eq('cliente_id', clienteId).order('patrimonio'),
   ]);
   if (!cliente) return <Flash erro="Cliente não encontrado" />;
 

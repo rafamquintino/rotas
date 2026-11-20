@@ -22,10 +22,14 @@ export async function enviarParaCliente(form: FormData) {
 export async function devolverAoEstoque(form: FormData) {
   const id = String(form.get('id'));
   const sb = await createClient();
-  const { error } = await sb.rpc('devolver_ao_estoque', { p_chopeira: id, p_obs: String(form.get('obs') ?? '') || null });
+  const { data, error } = await sb.rpc('devolver_ao_estoque', { p_chopeira: id, p_obs: String(form.get('obs') ?? '') || null });
   if (error) voltar(ficha(id), { erro: erroMsg(error) });
   revalidatePath('/', 'layout');
-  voltar(ficha(id), { ok: 'Chopeira devolvida ao estoque' });
+  voltar(ficha(id), {
+    ok: data?.status === 'em_limpeza'
+      ? 'Voltou do aluguel: a chopeira está em limpeza e fica disponível quando o técnico apontar "Pronta"'
+      : 'Chopeira devolvida ao estoque',
+  });
 }
 
 export async function alterarStatus(form: FormData) {
@@ -50,6 +54,7 @@ export async function salvarObservacoes(form: FormData) {
 export async function registrarFoto(id: string, caminho: string) {
   const sb = await createClient();
   const { data } = await sb.from('chopeiras').select('fotos').eq('id', id).single();
+  if ((data?.fotos ?? []).length >= 5) return { erro: 'A chopeira já tem 5 fotos. Remova uma para adicionar outra.' };
   const { error } = await sb.from('chopeiras').update({ fotos: [...(data?.fotos ?? []), caminho] }).eq('id', id);
   if (error) return { erro: erroMsg(error) };
   revalidatePath(ficha(id));
@@ -67,8 +72,13 @@ export async function salvarChopeira(form: FormData) {
     vias: num('vias'),
     capacidade_lph: num('capacidade_lph'),
     observacoes: String(form.get('observacoes') ?? '') || null,
-    ...(form.get('codigo') ? { codigo: String(form.get('codigo')).trim().toUpperCase() } : {}),
+    patrimonio: String(form.get('patrimonio') ?? '').trim() || null,
+    condicao: String(form.get('condicao') ?? '') || null,
+    ...(!id ? { fotos: form.getAll('fotos').map(String).filter(Boolean).slice(0, 5) } : {}),
   };
+  if (dados.patrimonio && !/^\d{4}$/.test(dados.patrimonio)) {
+    voltar(id ? `${ficha(id)}/editar` : '/cadastros/chopeiras/nova', { erro: 'O patrimônio deve ter 4 números (ex.: 0878)' });
+  }
   const sb = await createClient();
   const r = id
     ? await sb.from('chopeiras').update(dados).eq('id', id).select('id').single()
@@ -84,6 +94,7 @@ export async function inativarChopeira(form: FormData) {
   const sb = await createClient();
   const { data: ch } = await sb.from('chopeiras').select('status').eq('id', id).single();
   if (!ativo && ch?.status === 'em_cliente') voltar(ficha(id), { erro: 'Recolha a chopeira do cliente antes de inativar' });
+  if (!ativo && ch?.status === 'em_aluguel') voltar(ficha(id), { erro: 'Registre a volta do aluguel antes de inativar' });
   const { error } = await sb.from('chopeiras').update({ ativo }).eq('id', id);
   if (error) voltar(ficha(id), { erro: erroMsg(error) });
   revalidatePath('/', 'layout');
@@ -97,4 +108,72 @@ export async function excluirChopeira(form: FormData) {
   if (error) voltar(ficha(id), { erro: erroMsg(error) });
   revalidatePath('/', 'layout');
   voltar('/chopeiras', { ok: 'Chopeira excluída' });
+}
+
+export async function removerFoto(form: FormData) {
+  const id = String(form.get('id'));
+  const caminho = String(form.get('caminho'));
+  const sb = await createClient();
+  const { data } = await sb.from('chopeiras').select('fotos').eq('id', id).single();
+  const { error } = await sb.from('chopeiras').update({ fotos: (data?.fotos ?? []).filter((f: string) => f !== caminho) }).eq('id', id);
+  if (error) voltar(ficha(id), { erro: erroMsg(error) });
+  revalidatePath(ficha(id));
+  voltar(ficha(id), { ok: 'Foto removida' });
+}
+
+/** Patrimônio e condição: gestor e técnico (quem cola as etiquetas). */
+export async function salvarEtiqueta(form: FormData) {
+  const id = String(form.get('id'));
+  const patrimonio = String(form.get('patrimonio') ?? '').trim() || null;
+  if (patrimonio && !/^\d{4}$/.test(patrimonio)) voltar(ficha(id), { erro: 'O patrimônio deve ter 4 números (ex.: 0878)' });
+  const sb = await createClient();
+  const { error } = await sb.from('chopeiras')
+    .update({ patrimonio, condicao: String(form.get('condicao') ?? '') || null })
+    .eq('id', id);
+  if (error) voltar(ficha(id), { erro: erroMsg(error) });
+  revalidatePath('/', 'layout');
+  voltar(ficha(id), { ok: 'Patrimônio e condição salvos' });
+}
+
+export async function alugar(form: FormData) {
+  const id = String(form.get('id'));
+  const saida = String(form.get('saida') ?? '');
+  const volta = String(form.get('volta') ?? '');
+  const sb = await createClient();
+  const { data, error } = await sb.rpc('alugar_chopeira', {
+    p_chopeira: id, p_saida: saida, p_volta: volta, p_obs: String(form.get('obs') ?? '') || null,
+  });
+  if (error) voltar(`${ficha(id)}/alugar?saida=${saida}&volta=${volta}`, { erro: erroMsg(error) });
+  revalidatePath('/', 'layout');
+  voltar(ficha(id), {
+    ok: data?.status === 'em_andamento' ? 'Chopeira saiu para aluguel' : 'Reserva para o evento registrada',
+  });
+}
+
+export async function cancelarAluguel(form: FormData) {
+  const id = String(form.get('id'));
+  const sb = await createClient();
+  const { error } = await sb.rpc('cancelar_aluguel', { p_aluguel: String(form.get('aluguel')) });
+  if (error) voltar(ficha(id), { erro: erroMsg(error) });
+  revalidatePath('/', 'layout');
+  voltar(ficha(id), { ok: 'Reserva cancelada' });
+}
+
+export async function concluirLimpeza(form: FormData) {
+  const id = String(form.get('id'));
+  const pronta = form.get('resultado') !== 'defeito';
+  const itens = form.getAll('item').map(String);
+  const marcados = new Set(form.getAll('ok').map(String));
+  const sb = await createClient();
+  const { error } = await sb.rpc('concluir_limpeza', {
+    p_chopeira: id,
+    p_checklist: itens.map((item) => ({ item, ok: marcados.has(item) })),
+    p_obs: String(form.get('obs') ?? '') || null,
+    p_pronta: pronta,
+  });
+  if (error) voltar(`${ficha(id)}/limpeza`, { erro: erroMsg(error) });
+  revalidatePath('/', 'layout');
+  voltar(form.get('voltar') ? String(form.get('voltar')) : ficha(id), {
+    ok: pronta ? 'Limpeza registrada: chopeira disponível' : 'Chopeira enviada para manutenção',
+  });
 }

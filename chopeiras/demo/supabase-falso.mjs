@@ -13,6 +13,8 @@ import pg from 'pg';
 const PORTA = Number(process.env.PORTA ?? 3000);
 const NEXT_PORTA = Number(process.env.NEXT_PORTA ?? 3001);
 const PASTA_FOTOS = process.env.PASTA_FOTOS ?? path.resolve('demo/.fotos');
+// Datas (DATE) voltam como texto 'AAAA-MM-DD', igual ao PostgREST (sem converter para fuso horário)
+pg.types.setTypeParser(1082, (v) => v);
 const pool = new pg.Pool({ connectionString: process.env.DATABASE_URL });
 const refreshTokens = new Map();
 
@@ -186,12 +188,18 @@ async function rest(req, res, rota, url) {
       const args = JSON.parse(corpoTxt || '{}');
       const nomes = Object.keys(args);
       sql = `select * from ${id(fn)}(${nomes.map((n, i) => `${id(n)} => $${i + 1}`).join(', ')})`;
-      const rows = await comoUsuario(claims, (c) => c.query(sql, nomes.map((n) => args[n])).then((r) => r.rows));
+      const rows = await comoUsuario(claims, (c) => c.query(sql, nomes.map((n) => (args[n] !== null && typeof args[n] === 'object' ? JSON.stringify(args[n]) : args[n]))).then((r) => r.rows));
       return json(res, 200, rows.length === 1 ? rows[0] : rows);
     }
 
     const tabela = rota.slice(1);
-    if (req.method === 'GET') {
+    if ((req.method === 'GET' || req.method === 'HEAD') && prefer.includes('count=')) {
+      const pc = [];
+      const n = await comoUsuario(claims, (c) => c.query(`select count(*)::int as n from ${id(tabela)}${filtros(tabela, url, pc)}`, pc).then((r) => r.rows[0].n));
+      res.setHeader('Content-Range', `*/${n}`);
+      if (req.method === 'HEAD') { res.writeHead(200); return res.end(); }
+    }
+    if (req.method === 'GET' || req.method === 'HEAD') {
       const sel = url.searchParams.get('select') ?? '*';
       const cols = sel === '*' ? '*' : sel.split(',').map((c) => id(c.trim())).join(', ');
       sql = `select ${cols} from ${id(tabela)}${filtros(tabela, url, params)}`;

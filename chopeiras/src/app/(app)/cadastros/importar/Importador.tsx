@@ -4,7 +4,7 @@ import Papa from 'papaparse';
 import { importarCsv, type ResultadoImport } from '../actions';
 
 const MODELOS = {
-  chopeiras: 'codigo;numero_serie;marca;voltagem;vias;modelo;capacidade_lph;observacoes\nCH-0100;SN123;Gorillaz;220V;2;Gorillaz Pro 2V;100;',
+  chopeiras: 'patrimonio;numero_serie;marca;voltagem;vias;modelo;capacidade_lph;condicao;observacoes\n0878;SN123;Gorillaz;220V;2;Gorillaz Pro 2V;100;boa;\n;SN124;Gonçalves;110V;1;;;regular;sem etiqueta ainda',
   clientes: 'nome;cidade;endereco;contato;telefone;tipo;vendedor_email;freq_assepsia_dias;freq_manutencao_dias\nBar Exemplo;Poços de Caldas;Rua A, 10;João;35999999999;bar;vendedor@exemplo.com;15;90',
   usuarios: 'nome;email;senha;perfil;telefone;cidades\nMaria Silva;maria@exemplo.com;trocar123;vendedor;35999999999;Poços de Caldas, Andradas',
 };

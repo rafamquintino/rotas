@@ -15,7 +15,7 @@ export default async function FichaCliente({ params, searchParams }: { params: P
   const sb = await createClient();
   const [{ data: cli }, { data: chs }, { data: ags }, { data: servs }] = await Promise.all([
     sb.from('v_clientes').select('*').eq('id', id).single(),
-    sb.from('chopeiras').select('*').eq('cliente_id', id).order('codigo'),
+    sb.from('chopeiras').select('*').eq('cliente_id', id).order('patrimonio'),
     sb.from('v_agendamentos').select('*').eq('cliente_id', id).eq('status', 'agendado').order('data_prevista'),
     sb.from('v_servicos').select('*').eq('cliente_id', id).order('realizado_em', { ascending: false }).limit(50),
   ]);
@@ -66,13 +66,13 @@ export default async function FichaCliente({ params, searchParams }: { params: P
       </section>
 
       <section className="cartao">
-        <h2 className="mb-2 font-bold">Chopeiras instaladas ({chopeiras.length})</h2>
+        <h2 className="mb-2 font-bold">Chopeiras alocadas ({chopeiras.length})</h2>
         {chopeiras.length === 0 ? <p className="text-sm text-suave">Nenhuma chopeira neste cliente.</p> : (
           <ul className="divide-y divide-borda/60">
             {chopeiras.map((ch) => (
               <li key={ch.id}>
                 <Link href={`/chopeiras/${ch.id}`} className="flex justify-between py-2.5">
-                  <span><b>{ch.codigo}</b> <span className="text-sm text-suave">· {ch.marca} {ch.voltagem} · {ch.vias} vias</span></span>
+                  <span><b>{ch.rotulo}</b> <span className="text-sm text-suave">· {ch.marca} {ch.voltagem} · {ch.vias} vias</span></span>
                   <span className="text-xs text-suave">desde {fmtData(ch.data_entrada_cliente)}</span>
                 </Link>
               </li>
