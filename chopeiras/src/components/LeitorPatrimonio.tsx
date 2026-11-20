@@ -122,6 +122,11 @@ function LeitorPatrimonio({ onLer, onFechar }: { onLer: (p: string) => void; onF
     };
   }, []);
 
+  const confirmarDigitado = () => {
+    if (PATRIMONIO_RE.test(digitado)) aoLer.current(digitado);
+    else setAviso('Digite os 4 números do patrimônio.');
+  };
+
   const alternarLanterna = async () => {
     const t = trilha.current;
     if (!t || lanterna === null) return;
@@ -149,24 +154,19 @@ function LeitorPatrimonio({ onLer, onFechar }: { onLer: (p: string) => void; onF
         )}
       </div>
       <div className="flex flex-col gap-3 bg-malte p-4" style={{ paddingBottom: 'max(1rem, env(safe-area-inset-bottom))' }}>
-        <form
-          className="flex gap-2"
-          onSubmit={(e) => {
-            e.preventDefault();
-            if (PATRIMONIO_RE.test(digitado)) onLer(digitado);
-            else setAviso('Digite os 4 números do patrimônio.');
-          }}
-        >
+        {/* Sem <form>: o leitor costuma ficar dentro de outro formulário (ex.: cadastro) */}
+        <div className="flex gap-2">
           <input
             value={digitado}
             onChange={(e) => setDigitado(e.target.value.replace(/\D/g, '').slice(0, 4))}
+            onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); confirmarDigitado(); } }}
             inputMode="numeric"
             placeholder="ou digite: 0878"
             aria-label="Número do patrimônio"
             className="campo flex-1 text-center text-lg tracking-widest text-texto"
           />
-          <button className="btn-primario px-5">OK</button>
-        </form>
+          <button type="button" onClick={confirmarDigitado} className="btn-primario px-5">OK</button>
+        </div>
         <div className="grid grid-cols-2 gap-2">
           <button type="button" onClick={alternarLanterna} disabled={lanterna === null} className="btn border border-white/30 text-white disabled:opacity-40">
             {lanterna ? '🔦 Desligar luz' : '🔦 Lanterna'}
