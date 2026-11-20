@@ -5,26 +5,36 @@ import { getUsuario } from '@/lib/auth';
 import { urlsAssinadas } from '@/lib/fotos';
 import { Cabecalho, Flash, Linha, Selo } from '@/components/ui';
 import { BotaoEnviar } from '@/components/Botoes';
-import { fmtData, STATUS_CHOPEIRA, TIPO_SERVICO } from '@/lib/format';
-import type { Chopeira, HistoricoStatus, Servico } from '@/lib/types';
-import { alterarStatus, devolverAoEstoque, excluirChopeira, inativarChopeira, salvarObservacoes } from '../actions';
+import { CampoPatrimonio } from '@/components/CampoPatrimonio';
+import { CONDICAO, fmtData, MAX_FOTOS, relativoDias, STATUS_ALUGUEL, STATUS_CHOPEIRA, TIPO_SERVICO, hoje } from '@/lib/format';
+import type { Aluguel, Chopeira, Condicao, HistoricoStatus, Servico } from '@/lib/types';
+import {
+  alterarStatus, cancelarAluguel, devolverAoEstoque, excluirChopeira, inativarChopeira, removerFoto, salvarEtiqueta, salvarObservacoes,
+} from '../actions';
 import { FotoChopeira } from './FotoChopeira';
+
+const dias = (iso: string) => Math.round((Date.parse(hoje() + 'T12:00:00Z') - Date.parse(iso.slice(0, 10) + 'T12:00:00Z')) / 864e5);
 
 export default async function FichaChopeira({ params, searchParams }: { params: Promise<{ id: string }>; searchParams: Promise<{ ok?: string; erro?: string }> }) {
   const { id } = await params;
   const sp = await searchParams;
   const u = await getUsuario();
   const sb = await createClient();
+  await sb.rpc('sincronizar_alugueis');
 
-  const [{ data: ch }, { data: hist }, { data: servs }] = await Promise.all([
+  const [{ data: ch }, { data: hist }, { data: servs }, { data: alugs }] = await Promise.all([
     sb.from('v_chopeiras').select('*').eq('id', id).single(),
     sb.from('v_historico_status').select('*').eq('chopeira_id', id).order('criado_em', { ascending: false }),
     sb.from('v_servicos').select('*').eq('chopeira_id', id).order('realizado_em', { ascending: false }),
+    sb.from('v_alugueis').select('*').eq('chopeira_id', id).order('data_saida', { ascending: false }).limit(20),
   ]);
   if (!ch) notFound();
   const c = ch as Chopeira;
   const fotos = await urlsAssinadas(sb, c.fotos);
   const opera = u.perfil === 'gestor' || u.perfil === 'tecnico';
+  const alugueis = (alugs ?? []) as Aluguel[];
+  const reservas = alugueis.filter((a) => a.status === 'reservado').sort((a, b) => a.data_saida.localeCompare(b.data_saida));
+  const podeAlugar = c.ativo && !['em_cliente', 'baixada'].includes(c.status);
 
   // Linha do tempo única: mudanças de status + serviços
   const eventos = [
@@ -34,15 +44,18 @@ export default async function FichaChopeira({ params, searchParams }: { params: 
 
   return (
     <>
-      <Cabecalho titulo={c.codigo} voltar="/chopeiras"
+      <Cabecalho titulo={c.patrimonio ? `Patrimônio ${c.patrimonio}` : 'Sem patrimônio'} voltar="/chopeiras"
         acao={u.perfil === 'gestor' ? <Link href={`/chopeiras/${id}/editar`} className="btn-secundario min-h-[40px] px-3 text-sm">Editar</Link> : null} />
       <Flash ok={sp.ok} erro={sp.erro} />
 
       <section className="cartao">
         <div className="mb-2 flex flex-wrap items-center gap-2">
           <Selo cor={STATUS_CHOPEIRA[c.status].cor}>{STATUS_CHOPEIRA[c.status].label}</Selo>
+          {c.condicao && <Selo cor={CONDICAO[c.condicao].cor}>Condição: {CONDICAO[c.condicao].label}</Selo>}
+          {reservas.length > 0 && <Selo cor="marca">Reservada p/ {fmtData(reservas[0].data_saida).slice(0, 5)}</Selo>}
           {!c.ativo && <Selo cor="perigo">Inativa</Selo>}
         </div>
+        <Linha rotulo="Patrimônio">{c.patrimonio ?? 'sem etiqueta'}</Linha>
         <Linha rotulo="Marca">{c.marca}</Linha>
         <Linha rotulo="Modelo">{c.modelo_nome ?? '—'}</Linha>
         <Linha rotulo="Voltagem">{c.voltagem}</Linha>
@@ -51,29 +64,57 @@ export default async function FichaChopeira({ params, searchParams }: { params: 
         <Linha rotulo="Nº de série">{c.numero_serie ?? '—'}</Linha>
         {c.status === 'em_cliente' && (
           <>
-            <Linha rotulo="Cliente">
+            <Linha rotulo="Alocada em">
               {c.cliente_nome ? <Link className="text-marca" href={`/clientes/${c.cliente_id}`}>{c.cliente_nome}</Link> : 'Outra carteira'}
             </Linha>
             <Linha rotulo="Cidade">{c.cliente_cidade ?? '—'}</Linha>
             <Linha rotulo="No cliente desde">{fmtData(c.data_entrada_cliente)}</Linha>
           </>
         )}
+        {c.status === 'em_aluguel' && c.aluguel_volta && (
+          <>
+            <Linha rotulo="Saiu em">{fmtData(c.aluguel_saida)}</Linha>
+            <Linha rotulo="Volta prevista">
+              <span className={c.aluguel_volta < hoje() ? 'text-perigo' : ''}>{fmtData(c.aluguel_volta)}{c.aluguel_volta < hoje() ? ' (atrasada)' : ''}</span>
+            </Linha>
+            {c.aluguel_obs && <Linha rotulo="Evento">{c.aluguel_obs}</Linha>}
+          </>
+        )}
+        {c.status === 'em_limpeza' && c.status_desde && (
+          <Linha rotulo="Em limpeza desde">{fmtData(c.status_desde)} ({relativoDias(-dias(c.status_desde)).replace(' atrasado', '')})</Linha>
+        )}
       </section>
 
-      {opera && c.ativo && (
+      {c.ativo && c.status !== 'baixada' && (
         <section className="flex flex-col gap-2">
-          {(c.status === 'disponivel' || c.status === 'reservada') && (
-            <Link href={`/chopeiras/${id}/enviar`} className="btn-primario text-lg">🚚 Enviar para cliente</Link>
+          {c.status === 'em_limpeza' && opera && (
+            <Link href={`/chopeiras/${id}/limpeza`} className="btn-ok text-lg">🧽 Limpeza feita – apontar</Link>
           )}
-          {c.status !== 'disponivel' && c.status !== 'baixada' && (
+          {c.status === 'em_aluguel' && (
             <form action={devolverAoEstoque}>
               <input type="hidden" name="id" value={id} />
-              <BotaoEnviar className="btn-ok w-full" confirmar={c.status === 'em_cliente' ? `Recolher ${c.codigo} do cliente e devolver ao estoque? A agenda pendente será cancelada.` : undefined}>
+              <BotaoEnviar className="btn-ok w-full text-lg" confirmar="Registrar que a chopeira voltou do aluguel? Ela vai para limpeza.">
+                ↩ Voltou do aluguel
+              </BotaoEnviar>
+            </form>
+          )}
+          {opera && (c.status === 'disponivel' || c.status === 'reservada') && (
+            <Link href={`/chopeiras/${id}/enviar`} className="btn-primario text-lg">📍 Alocar em cliente</Link>
+          )}
+          {podeAlugar && (
+            <Link href={`/chopeiras/${id}/alugar`} className={c.status === 'disponivel' ? 'btn-secundario text-lg' : 'btn-secundario'}>
+              🎉 {c.status === 'disponivel' ? 'Alugar' : 'Reservar para evento'}
+            </Link>
+          )}
+          {opera && !['disponivel', 'em_aluguel', 'em_limpeza'].includes(c.status) && (
+            <form action={devolverAoEstoque}>
+              <input type="hidden" name="id" value={id} />
+              <BotaoEnviar className="btn-ok w-full" confirmar={c.status === 'em_cliente' ? 'Recolher a chopeira do cliente e devolver ao estoque? A agenda pendente será cancelada.' : undefined}>
                 ↩ Devolver ao estoque
               </BotaoEnviar>
             </form>
           )}
-          {c.status !== 'em_manutencao' && c.status !== 'baixada' && (
+          {opera && !['em_manutencao', 'em_aluguel'].includes(c.status) && (
             <form action={alterarStatus} className="flex flex-col gap-2">
               <input type="hidden" name="id" value={id} />
               <input type="hidden" name="status" value="em_manutencao" />
@@ -81,35 +122,79 @@ export default async function FichaChopeira({ params, searchParams }: { params: 
               <BotaoEnviar className="btn-secundario w-full" confirmar={c.status === 'em_cliente' ? 'A chopeira sairá do cliente. Confirmar?' : undefined}>🔧 Enviar para manutenção</BotaoEnviar>
             </form>
           )}
-          {c.status === 'disponivel' && (
-            <form action={alterarStatus}>
-              <input type="hidden" name="id" value={id} />
-              <input type="hidden" name="status" value="reservada" />
-              <BotaoEnviar className="btn-secundario w-full">📌 Reservar</BotaoEnviar>
-            </form>
-          )}
-          {u.perfil === 'gestor' && c.status !== 'baixada' && c.status !== 'em_cliente' && (
+          {u.perfil === 'gestor' && !['em_cliente', 'em_aluguel'].includes(c.status) && (
             <form action={alterarStatus}>
               <input type="hidden" name="id" value={id} />
               <input type="hidden" name="status" value="baixada" />
-              <BotaoEnviar className="btn-secundario w-full text-perigo" confirmar="Dar baixa definitiva nesta chopeira?">Dar baixa</BotaoEnviar>
+              <BotaoEnviar className="btn-secundario w-full text-perigo" confirmar="Dar baixa definitiva nesta chopeira? Reservas futuras serão canceladas.">Dar baixa</BotaoEnviar>
             </form>
           )}
         </section>
       )}
 
+      {(reservas.length > 0 || alugueis.length > 0) && (
+        <section className="cartao">
+          <h2 className="mb-2 font-bold">Aluguéis e reservas</h2>
+          <ul className="divide-y divide-borda/60">
+            {alugueis.slice(0, 8).map((a) => (
+              <li key={a.id} className="flex items-center justify-between gap-2 py-2.5 text-sm">
+                <span>
+                  <b>{fmtData(a.data_saida).slice(0, 5)} → {fmtData(a.data_volta_prevista).slice(0, 5)}</b>
+                  {a.observacao ? ` · ${a.observacao}` : ''}
+                  <span className="block text-xs text-suave">por {a.criado_por_nome ?? '—'}</span>
+                </span>
+                <span className="flex shrink-0 items-center gap-2">
+                  <Selo cor={a.atrasado ? 'perigo' : STATUS_ALUGUEL[a.status].cor}>{a.atrasado ? 'Volta atrasada' : STATUS_ALUGUEL[a.status].label}</Selo>
+                  {a.status === 'reservado' && (
+                    <form action={cancelarAluguel}>
+                      <input type="hidden" name="id" value={id} />
+                      <input type="hidden" name="aluguel" value={a.id} />
+                      <BotaoEnviar className="text-xs font-semibold text-perigo" confirmar="Cancelar esta reserva?">Cancelar</BotaoEnviar>
+                    </form>
+                  )}
+                </span>
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
+
+      {opera && (
+        <section className="cartao">
+          <h2 className="mb-2 font-bold">Etiqueta e condição</h2>
+          <form action={salvarEtiqueta} className="flex flex-col gap-3">
+            <input type="hidden" name="id" value={id} />
+            <CampoPatrimonio valor={c.patrimonio} />
+            <select name="condicao" defaultValue={c.condicao ?? ''} className="campo" aria-label="Condição">
+              <option value="">Condição: não informada</option>
+              {(Object.keys(CONDICAO) as Condicao[]).map((k) => <option key={k} value={k}>Condição: {CONDICAO[k].label}</option>)}
+            </select>
+            <BotaoEnviar className="btn-secundario w-full">Salvar patrimônio e condição</BotaoEnviar>
+          </form>
+        </section>
+      )}
+
       <section className="cartao flex flex-col gap-3">
-        <h2 className="font-bold">Fotos</h2>
+        <h2 className="font-bold">Fotos ({c.fotos.length}/{MAX_FOTOS})</h2>
         {c.fotos.length > 0 ? (
           <div className="grid grid-cols-3 gap-2">
             {c.fotos.map((f) => fotos[f] && (
-              <a key={f} href={fotos[f]} target="_blank" rel="noreferrer">
-                <img src={fotos[f]} alt="" loading="lazy" className="aspect-square w-full rounded-lg object-cover" />
-              </a>
+              <div key={f} className="relative">
+                <a href={fotos[f]} target="_blank" rel="noreferrer">
+                  <img src={fotos[f]} alt="" loading="lazy" className="aspect-square w-full rounded-lg object-cover" />
+                </a>
+                {opera && (
+                  <form action={removerFoto} className="absolute right-1 top-1">
+                    <input type="hidden" name="id" value={id} />
+                    <input type="hidden" name="caminho" value={f} />
+                    <BotaoEnviar className="rounded-full bg-black/60 px-2 text-xs text-white" confirmar="Remover esta foto?">✕</BotaoEnviar>
+                  </form>
+                )}
+              </div>
             ))}
           </div>
         ) : <p className="text-sm text-suave">Sem fotos.</p>}
-        {opera && <FotoChopeira id={id} />}
+        {opera && c.fotos.length < MAX_FOTOS && <FotoChopeira id={id} />}
       </section>
 
       <section className="cartao">
@@ -139,7 +224,7 @@ export default async function FichaChopeira({ params, searchParams }: { params: 
                 </div>
               ) : (
                 <div className="text-sm">
-                  <b>{TIPO_SERVICO[e.s.tipo].label}</b> · {e.s.cliente_nome}
+                  <b>{TIPO_SERVICO[e.s.tipo].label}</b>{e.s.cliente_nome ? ` · ${e.s.cliente_nome}` : ''}
                   <div className="text-xs text-suave">{e.s.tecnico_nome}{e.s.observacoes ? ` — ${e.s.observacoes}` : ''}</div>
                 </div>
               )}
@@ -157,7 +242,7 @@ export default async function FichaChopeira({ params, searchParams }: { params: 
               {c.ativo ? 'Inativar chopeira' : 'Reativar chopeira'}
             </BotaoEnviar>
           </form>
-          {eventos.length <= 1 && (
+          {eventos.length <= 1 && alugueis.length === 0 && (
             <form action={excluirChopeira}>
               <input type="hidden" name="id" value={id} />
               <BotaoEnviar className="btn-secundario w-full text-perigo" confirmar="Excluir definitivamente? (só é possível sem histórico)">Excluir</BotaoEnviar>

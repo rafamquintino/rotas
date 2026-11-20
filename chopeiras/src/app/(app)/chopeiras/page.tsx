@@ -2,7 +2,8 @@ import Link from 'next/link';
 import { createClient } from '@/lib/supabase/server';
 import { getUsuario } from '@/lib/auth';
 import { Chips, Flash, Selo, Vazio } from '@/components/ui';
-import { STATUS_CHOPEIRA } from '@/lib/format';
+import { CONDICAO, fmtData, hoje, STATUS_CHOPEIRA } from '@/lib/format';
+import { LerParaFicha } from '@/components/LerParaFicha';
 import type { Chopeira, StatusChopeira } from '@/lib/types';
 
 export const metadata = { title: 'Estoque' };
@@ -13,14 +14,17 @@ export default async function Estoque({ searchParams }: { searchParams: Promise<
   const sp = await searchParams;
   const u = await getUsuario();
   const sb = await createClient();
+  await sb.rpc('sincronizar_alugueis');
 
-  let q = sb.from('v_chopeiras').select('*').order('codigo').limit(300);
+  let q = sb.from('v_chopeiras').select('*').order('patrimonio', { ascending: true, nullsFirst: false }).order('codigo').limit(300);
   q = sp.inativas ? q.eq('ativo', false) : q.eq('ativo', true);
-  if (sp.q) q = q.or(`codigo.ilike.%${sp.q.replace(/[%,()]/g, '')}%,numero_serie.ilike.%${sp.q.replace(/[%,()]/g, '')}%`);
+  const busca = (sp.q ?? '').replace(/[%,()*]/g, '').trim();
+  if (busca) q = q.or(`patrimonio.ilike.%${busca}%,numero_serie.ilike.%${busca}%`);
   if (sp.marca) q = q.eq('marca', sp.marca);
   if (sp.voltagem) q = q.eq('voltagem', sp.voltagem);
   if (sp.vias) q = q.eq('vias', Number(sp.vias));
-  if (sp.status) q = q.eq('status', sp.status);
+  if (sp.status === 'reserva') q = q.not('reserva_saida', 'is', null);
+  else if (sp.status) q = q.eq('status', sp.status);
   if (sp.cidade) q = q.eq('cliente_cidade', sp.cidade);
 
   const [{ data }, { data: cidades }] = await Promise.all([
@@ -43,13 +47,18 @@ export default async function Estoque({ searchParams }: { searchParams: Promise<
         {Object.entries(sp).filter(([k, v]) => v && !['q', 'ok', 'erro'].includes(k)).map(([k, v]) => (
           <input key={k} type="hidden" name={k} value={v} />
         ))}
-        <input name="q" defaultValue={sp.q} placeholder="Buscar código ou nº de série" className="campo" inputMode="search" />
+        <input name="q" defaultValue={sp.q} placeholder="Patrimônio ou nº de série" className="campo" inputMode="search" />
         <button className="btn-secundario px-4">Buscar</button>
+        <LerParaFicha />
       </form>
 
       <div className="flex flex-col gap-2">
         <Chips nome="status" base="/chopeiras" params={params}
-          opcoes={(Object.keys(STATUS_CHOPEIRA) as StatusChopeira[]).map((s) => ({ valor: s, label: STATUS_CHOPEIRA[s].label }))} />
+          opcoes={[
+            ...(['disponivel', 'em_cliente', 'em_aluguel', 'em_limpeza', 'em_manutencao'] as StatusChopeira[]).map((s) => ({ valor: s, label: STATUS_CHOPEIRA[s].label })),
+            { valor: 'reserva', label: 'Reservadas p/ evento' },
+            ...(['reservada', 'baixada'] as StatusChopeira[]).map((s) => ({ valor: s, label: STATUS_CHOPEIRA[s].label })),
+          ]} />
         <Chips nome="marca" base="/chopeiras" params={params} opcoes={[{ valor: 'Gorillaz', label: 'Gorillaz' }, { valor: 'Gonçalves', label: 'Gonçalves' }]} />
         <Chips nome="voltagem" base="/chopeiras" params={params} opcoes={[{ valor: '110V', label: '110V' }, { valor: '220V', label: '220V' }]} />
         <Chips nome="vias" base="/chopeiras" params={params} opcoes={[1, 2, 3].map((v) => ({ valor: String(v), label: `${v} ${v === 1 ? 'via' : 'vias'}` }))} />
@@ -77,14 +86,20 @@ export default async function Estoque({ searchParams }: { searchParams: Promise<
                   <span className="text-[10px] font-semibold uppercase">vias</span>
                 </div>
                 <div className="min-w-0 flex-1">
-                  <div className="flex items-center gap-2">
-                    <span className="font-bold">{c.codigo}</span>
+                  <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
+                    <span className={c.patrimonio ? 'font-bold tracking-wider' : 'text-sm font-semibold text-suave'}>
+                      {c.patrimonio ?? 'Sem patrimônio'}
+                    </span>
                     <Selo cor={STATUS_CHOPEIRA[c.status].cor}>{STATUS_CHOPEIRA[c.status].label}</Selo>
+                    {c.reserva_saida && <Selo cor="marca">Reserva {fmtData(c.reserva_saida).slice(0, 5)}</Selo>}
+                    {c.condicao && c.condicao !== 'otima' && c.condicao !== 'boa' && <Selo cor={CONDICAO[c.condicao].cor}>{CONDICAO[c.condicao].label}</Selo>}
                   </div>
                   <div className="truncate text-sm text-suave">
                     {c.marca} · {c.voltagem}
                     {c.capacidade_lph ? ` · ${Number(c.capacidade_lph)} L/h` : ''}
+                    {!c.patrimonio && c.numero_serie ? ` · série ${c.numero_serie}` : ''}
                     {c.status === 'em_cliente' && (c.cliente_nome ? ` · ${c.cliente_nome}` : ' · cliente de outra carteira')}
+                    {c.status === 'em_aluguel' && c.aluguel_volta && ` · volta ${fmtData(c.aluguel_volta).slice(0, 5)}${c.aluguel_volta < hoje() ? ' (atrasada)' : ''}`}
                   </div>
                 </div>
                 <span className="text-xl text-suave">›</span>

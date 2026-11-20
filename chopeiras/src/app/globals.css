@@ -17,6 +17,8 @@
   --alerta: 196 120 0;
   --perigo: 198 40 40;
   --info: 21 101 192;
+  --roxo: 123 31 162;
+  --ciano: 0 131 143;
   color-scheme: light;
 }
 
@@ -34,6 +36,8 @@
   --alerta: 255 179 0;
   --perigo: 239 83 80;
   --info: 100 160 240;
+  --roxo: 206 147 216;
+  --ciano: 77 208 225;
   color-scheme: dark;
 }
 
@@ -68,6 +72,9 @@ body {
   .tabela th { @apply border-b border-borda px-2 py-2 font-semibold text-suave; }
   .tabela td { @apply border-b border-borda/60 px-2 py-2; }
 }
+
+@keyframes barra { 0% { transform: translateX(-100%); } 100% { transform: translateX(300%); } }
+@media (prefers-reduced-motion: reduce) { [role=progressbar] div { animation: none !important; width: 100%; } }
 
 .scroll-x { overflow-x: auto; scrollbar-width: none; }
 .scroll-x::-webkit-scrollbar { display: none; }

@@ -191,7 +191,13 @@ async function rest(req, res, rota, url) {
     }
 
     const tabela = rota.slice(1);
-    if (req.method === 'GET') {
+    if ((req.method === 'GET' || req.method === 'HEAD') && prefer.includes('count=')) {
+      const pc = [];
+      const n = await comoUsuario(claims, (c) => c.query(`select count(*)::int as n from ${id(tabela)}${filtros(tabela, url, pc)}`, pc).then((r) => r.rows[0].n));
+      res.setHeader('Content-Range', `*/${n}`);
+      if (req.method === 'HEAD') { res.writeHead(200); return res.end(); }
+    }
+    if (req.method === 'GET' || req.method === 'HEAD') {
       const sel = url.searchParams.get('select') ?? '*';
       const cols = sel === '*' ? '*' : sel.split(',').map((c) => id(c.trim())).join(', ');
       sql = `select ${cols} from ${id(tabela)}${filtros(tabela, url, params)}`;

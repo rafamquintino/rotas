@@ -1,8 +1,10 @@
 export type Perfil = 'gestor' | 'vendedor' | 'tecnico';
 export type Marca = 'Gorillaz' | 'Gonçalves';
 export type Voltagem = '110V' | '220V';
-export type StatusChopeira = 'disponivel' | 'em_cliente' | 'em_manutencao' | 'reservada' | 'baixada';
-export type TipoServico = 'assepsia' | 'manutencao_preventiva' | 'manutencao_corretiva';
+export type StatusChopeira = 'disponivel' | 'em_cliente' | 'em_aluguel' | 'em_manutencao' | 'em_limpeza' | 'reservada' | 'baixada';
+export type Condicao = 'otima' | 'boa' | 'regular' | 'ruim';
+export type StatusAluguel = 'reservado' | 'em_andamento' | 'devolvido' | 'cancelado';
+export type TipoServico = 'assepsia' | 'manutencao_preventiva' | 'manutencao_corretiva' | 'limpeza';
 export type StatusAgendamento = 'agendado' | 'realizado' | 'atrasado' | 'cancelado';
 export type Situacao = 'em_dia' | 'a_vencer' | 'atrasado';
 
@@ -28,6 +30,9 @@ export interface Modelo {
 export interface Chopeira {
   id: string;
   codigo: string;
+  patrimonio: string | null;
+  rotulo: string;
+  condicao: Condicao | null;
   numero_serie: string | null;
   modelo_id: string | null;
   modelo_nome?: string | null;
@@ -45,6 +50,31 @@ export interface Chopeira {
   ativo: boolean;
   criado_em: string;
   atualizado_em: string;
+  aluguel_saida?: string | null;
+  aluguel_volta?: string | null;
+  aluguel_obs?: string | null;
+  reserva_saida?: string | null;
+  reserva_volta?: string | null;
+  reserva_obs?: string | null;
+  status_desde?: string | null;
+}
+
+export interface Aluguel {
+  id: string;
+  chopeira_id: string;
+  data_saida: string;
+  data_volta_prevista: string;
+  observacao: string | null;
+  status: StatusAluguel;
+  devolvido_em: string | null;
+  rotulo: string;
+  patrimonio: string | null;
+  marca: Marca;
+  voltagem: Voltagem;
+  vias: number;
+  atrasado: boolean;
+  criado_por_nome: string | null;
+  criado_em: string;
 }
 
 export interface Cliente {
@@ -100,9 +130,9 @@ export interface Servico {
   tipo: TipoServico;
   chopeira_id: string | null;
   chopeira_codigo?: string | null;
-  cliente_id: string;
-  cliente_nome?: string;
-  cidade?: string;
+  cliente_id: string | null;
+  cliente_nome?: string | null;
+  cidade?: string | null;
   tecnico_id: string;
   tecnico_nome?: string | null;
   vendedor_nome?: string | null;

@@ -1,11 +1,13 @@
-import type { Perfil, Situacao, StatusAgendamento, StatusChopeira, TipoServico } from './types';
+import type { Condicao, Perfil, Situacao, StatusAgendamento, StatusAluguel, StatusChopeira, TipoServico } from './types';
 
 export const TZ = 'America/Sao_Paulo';
 
 export const STATUS_CHOPEIRA: Record<StatusChopeira, { label: string; cor: string }> = {
   disponivel: { label: 'Disponível', cor: 'ok' },
-  em_cliente: { label: 'Em cliente', cor: 'info' },
+  em_cliente: { label: 'Alocada em cliente', cor: 'info' },
+  em_aluguel: { label: 'Em aluguel', cor: 'roxo' },
   em_manutencao: { label: 'Em manutenção', cor: 'alerta' },
+  em_limpeza: { label: 'Em limpeza', cor: 'ciano' },
   reservada: { label: 'Reservada', cor: 'marca' },
   baixada: { label: 'Baixada', cor: 'suave' },
 };
@@ -14,7 +16,24 @@ export const TIPO_SERVICO: Record<TipoServico, { label: string; curto: string }>
   assepsia: { label: 'Assepsia', curto: 'Assepsia' },
   manutencao_preventiva: { label: 'Manutenção preventiva', curto: 'Preventiva' },
   manutencao_corretiva: { label: 'Manutenção corretiva', curto: 'Corretiva' },
+  limpeza: { label: 'Limpeza (volta do aluguel)', curto: 'Limpeza' },
 };
+
+export const STATUS_ALUGUEL: Record<StatusAluguel, { label: string; cor: string }> = {
+  reservado: { label: 'Reservado', cor: 'marca' },
+  em_andamento: { label: 'Em aluguel', cor: 'roxo' },
+  devolvido: { label: 'Devolvido', cor: 'ok' },
+  cancelado: { label: 'Cancelado', cor: 'suave' },
+};
+
+export const CONDICAO: Record<Condicao, { label: string; cor: string }> = {
+  otima: { label: 'Ótima', cor: 'ok' },
+  boa: { label: 'Boa', cor: 'info' },
+  regular: { label: 'Regular', cor: 'alerta' },
+  ruim: { label: 'Ruim', cor: 'perigo' },
+};
+
+export const MAX_FOTOS = 5;
 
 export const STATUS_AGENDAMENTO: Record<StatusAgendamento, { label: string; cor: string }> = {
   agendado: { label: 'Agendado', cor: 'info' },
@@ -57,6 +76,14 @@ export const CHECKLIST: Record<TipoServico, string[]> = {
     'Defeito identificado',
     'Peça substituída/reparada',
     'Teste de funcionamento ok',
+  ],
+  limpeza: [
+    'Linhas e serpentina higienizadas',
+    'Torneiras desmontadas e limpas',
+    'Bandeja e parte externa limpas',
+    'Sem vazamento nas conexões',
+    'Refrigeração testada',
+    'Cabo, engate e acessórios conferidos',
   ],
 };
 

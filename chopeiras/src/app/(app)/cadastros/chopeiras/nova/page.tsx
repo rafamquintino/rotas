@@ -4,7 +4,7 @@ import { Cabecalho, Flash } from '@/components/ui';
 import { FormChopeira } from '@/components/FormChopeira';
 import type { Modelo } from '@/lib/types';
 
-export default async function NovaChopeira({ searchParams }: { searchParams: Promise<{ erro?: string }> }) {
+export default async function NovaChopeira({ searchParams }: { searchParams: Promise<{ erro?: string; patrimonio?: string }> }) {
   await exigirPerfil('gestor');
   const sp = await searchParams;
   const sb = await createClient();
@@ -13,7 +13,7 @@ export default async function NovaChopeira({ searchParams }: { searchParams: Pro
     <>
       <Cabecalho titulo="Nova chopeira" voltar="/cadastros" />
       <Flash erro={sp.erro} />
-      <FormChopeira modelos={(modelos ?? []) as Modelo[]} />
+      <FormChopeira modelos={(modelos ?? []) as Modelo[]} patrimonio={/^\d{4}$/.test(sp.patrimonio ?? '') ? sp.patrimonio : undefined} />
     </>
   );
 }

@@ -29,6 +29,15 @@ assepsia e manutenção preventiva por cliente, com histórico completo. Usado p
 5. Em Supabase › Authentication › URL Configuration, coloque a URL da Vercel em *Site URL*, e
    `https://SEU-APP.vercel.app/auth/callback` em *Redirect URLs* (para "Esqueci minha senha").
 
+### Atualizar um banco já instalado
+
+Quem já rodou o `instalar.sql` antes **não** roda ele de novo: rode, no SQL Editor e **na ordem**, só as
+migrações novas de `supabase/migrations/` (cada arquivo numa execução separada). Exemplo da rodada de 20/11/2026:
+1. `20261120000001_novos_status.sql`
+2. `20261120000002_aluguel_patrimonio.sql`
+
+Para remover os dados de demonstração criados pelo `seed.sql`: `supabase/apagar_exemplos.sql`.
+
 Rodar local: `cp .env.example .env.local` (preencha), `npm install`, `npm run dev`.
 
 ## Ver sem criar conta (modo demonstração)

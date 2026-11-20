@@ -7,6 +7,8 @@ const CORES: Record<string, string> = {
   perigo: 'bg-perigo/15 text-perigo',
   marca: 'bg-marca/15 text-marca-forte',
   suave: 'bg-suave/15 text-suave',
+  roxo: 'bg-roxo/15 text-roxo',
+  ciano: 'bg-ciano/15 text-ciano',
 };
 
 export function Selo({ cor = 'suave', children }: { cor?: string; children: React.ReactNode }) {

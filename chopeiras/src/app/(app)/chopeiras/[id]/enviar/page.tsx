@@ -4,6 +4,7 @@ import { exigirPerfil } from '@/lib/auth';
 import { Cabecalho, Flash } from '@/components/ui';
 import { BotaoEnviar } from '@/components/Botoes';
 import { hoje } from '@/lib/format';
+import { ConferirPatrimonio } from '@/components/LeitorPatrimonio';
 import { enviarParaCliente } from '../../actions';
 
 export default async function Enviar({ params, searchParams }: { params: Promise<{ id: string }>; searchParams: Promise<{ erro?: string; cidade?: string }> }) {
@@ -12,7 +13,7 @@ export default async function Enviar({ params, searchParams }: { params: Promise
   const sp = await searchParams;
   const sb = await createClient();
   const [{ data: ch }, { data: clientes }] = await Promise.all([
-    sb.from('chopeiras').select('codigo, marca, voltagem, vias, status').eq('id', id).single(),
+    sb.from('chopeiras').select('rotulo, patrimonio, marca, voltagem, vias, status').eq('id', id).single(),
     sb.from('clientes').select('id, nome, cidade').eq('ativo', true).order('cidade').order('nome'),
   ]);
   if (!ch) notFound();
@@ -21,8 +22,9 @@ export default async function Enviar({ params, searchParams }: { params: Promise
 
   return (
     <>
-      <Cabecalho titulo={`Enviar ${ch.codigo}`} voltar={`/chopeiras/${id}`} />
-      <p className="text-sm text-suave">{ch.marca} · {ch.voltagem} · {ch.vias} vias</p>
+      <Cabecalho titulo={`Alocar ${ch.patrimonio ?? ch.rotulo}`} voltar={`/chopeiras/${id}`} />
+      <p className="text-sm text-suave">{ch.marca} · {ch.voltagem} · {ch.vias} vias · fica no cliente (comodato)</p>
+      <ConferirPatrimonio esperado={ch.patrimonio} rotulo={ch.rotulo} />
       <Flash erro={sp.erro} />
       <form action={enviarParaCliente} className="cartao flex flex-col gap-4">
         <input type="hidden" name="id" value={id} />
@@ -46,7 +48,7 @@ export default async function Enviar({ params, searchParams }: { params: Promise
           <input id="obs" name="obs" className="campo" placeholder="Ex.: instalada no balcão" />
         </div>
         <p className="text-xs text-suave">A primeira assepsia e a primeira preventiva serão agendadas pela frequência do cliente.</p>
-        <BotaoEnviar>Confirmar envio</BotaoEnviar>
+        <BotaoEnviar>Confirmar alocação</BotaoEnviar>
       </form>
     </>
   );

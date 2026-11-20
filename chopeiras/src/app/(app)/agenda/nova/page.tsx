@@ -77,7 +77,7 @@ export default async function NovaAssepsia({ searchParams }: { searchParams: Pro
   }
 
   // Passo 3: confirmar
-  const { data: chs } = await sb.from('chopeiras').select('id, codigo').eq('cliente_id', cliente.id).order('codigo');
+  const { data: chs } = await sb.from('chopeiras').select('id, rotulo').eq('cliente_id', cliente.id).order('patrimonio');
   return (
     <>
       <Cabecalho titulo="3. Confirmar" voltar={`/agenda/nova?cliente=${cliente.id}${extra}`} />
@@ -97,7 +97,7 @@ export default async function NovaAssepsia({ searchParams }: { searchParams: Pro
             <label className="rotulo">Chopeira</label>
             <select name="chopeira_id" className="campo" defaultValue="">
               <option value="">Todas as chopeiras do cliente</option>
-              {(chs ?? []).map((c) => <option key={c.id} value={c.id}>{c.codigo}</option>)}
+              {(chs ?? []).map((c) => <option key={c.id} value={c.id}>{c.rotulo}</option>)}
             </select>
           </div>
         )}
