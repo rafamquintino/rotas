@@ -92,6 +92,13 @@ export function hoje(): string {
   return new Intl.DateTimeFormat('en-CA', { timeZone: TZ }).format(new Date());
 }
 
+/** Dias inteiros desde uma data/hora até hoje, contando no fuso da cervejaria. */
+export function diasDesde(v?: string | null): number {
+  if (!v) return 0;
+  const dia = /^\d{4}-\d{2}-\d{2}$/.test(v) ? v : new Intl.DateTimeFormat('en-CA', { timeZone: TZ }).format(new Date(v));
+  return Math.max(0, Math.round((Date.parse(hoje() + 'T12:00:00Z') - Date.parse(dia + 'T12:00:00Z')) / 864e5));
+}
+
 export function somaDias(iso: string, dias: number): string {
   const d = new Date(iso + 'T12:00:00Z');
   d.setUTCDate(d.getUTCDate() + dias);

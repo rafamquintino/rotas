@@ -6,14 +6,13 @@ import { urlsAssinadas } from '@/lib/fotos';
 import { Cabecalho, Flash, Linha, Selo } from '@/components/ui';
 import { BotaoEnviar } from '@/components/Botoes';
 import { CampoPatrimonio } from '@/components/CampoPatrimonio';
-import { CONDICAO, fmtData, MAX_FOTOS, relativoDias, STATUS_ALUGUEL, STATUS_CHOPEIRA, TIPO_SERVICO, hoje } from '@/lib/format';
+import { CONDICAO, diasDesde, fmtData, MAX_FOTOS, STATUS_ALUGUEL, STATUS_CHOPEIRA, TIPO_SERVICO, hoje } from '@/lib/format';
 import type { Aluguel, Chopeira, Condicao, HistoricoStatus, Servico } from '@/lib/types';
 import {
   alterarStatus, cancelarAluguel, devolverAoEstoque, excluirChopeira, inativarChopeira, removerFoto, salvarEtiqueta, salvarObservacoes,
 } from '../actions';
 import { FotoChopeira } from './FotoChopeira';
 
-const dias = (iso: string) => Math.round((Date.parse(hoje() + 'T12:00:00Z') - Date.parse(iso.slice(0, 10) + 'T12:00:00Z')) / 864e5);
 
 export default async function FichaChopeira({ params, searchParams }: { params: Promise<{ id: string }>; searchParams: Promise<{ ok?: string; erro?: string }> }) {
   const { id } = await params;
@@ -81,7 +80,7 @@ export default async function FichaChopeira({ params, searchParams }: { params: 
           </>
         )}
         {c.status === 'em_limpeza' && c.status_desde && (
-          <Linha rotulo="Em limpeza desde">{fmtData(c.status_desde)} ({relativoDias(-dias(c.status_desde)).replace(' atrasado', '')})</Linha>
+          <Linha rotulo="Em limpeza desde">{fmtData(c.status_desde)} ({diasDesde(c.status_desde) === 0 ? 'hoje' : `há ${diasDesde(c.status_desde)} dia(s)`})</Linha>
         )}
       </section>
 

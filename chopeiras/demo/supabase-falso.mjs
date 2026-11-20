@@ -13,6 +13,8 @@ import pg from 'pg';
 const PORTA = Number(process.env.PORTA ?? 3000);
 const NEXT_PORTA = Number(process.env.NEXT_PORTA ?? 3001);
 const PASTA_FOTOS = process.env.PASTA_FOTOS ?? path.resolve('demo/.fotos');
+// Datas (DATE) voltam como texto 'AAAA-MM-DD', igual ao PostgREST (sem converter para fuso horário)
+pg.types.setTypeParser(1082, (v) => v);
 const pool = new pg.Pool({ connectionString: process.env.DATABASE_URL });
 const refreshTokens = new Map();
 
@@ -186,7 +188,7 @@ async function rest(req, res, rota, url) {
       const args = JSON.parse(corpoTxt || '{}');
       const nomes = Object.keys(args);
       sql = `select * from ${id(fn)}(${nomes.map((n, i) => `${id(n)} => $${i + 1}`).join(', ')})`;
-      const rows = await comoUsuario(claims, (c) => c.query(sql, nomes.map((n) => args[n])).then((r) => r.rows));
+      const rows = await comoUsuario(claims, (c) => c.query(sql, nomes.map((n) => (args[n] !== null && typeof args[n] === 'object' ? JSON.stringify(args[n]) : args[n]))).then((r) => r.rows));
       return json(res, 200, rows.length === 1 ? rows[0] : rows);
     }
 

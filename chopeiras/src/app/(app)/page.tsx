@@ -2,7 +2,7 @@ import Link from 'next/link';
 import { createClient } from '@/lib/supabase/server';
 import { getUsuario } from '@/lib/auth';
 import { Flash, Selo } from '@/components/ui';
-import { fmtData, hoje, relativoDias, somaDias, TIPO_SERVICO } from '@/lib/format';
+import { diasDesde, fmtData, hoje, relativoDias, somaDias, TIPO_SERVICO } from '@/lib/format';
 import type { Agendamento, Aluguel, Chopeira } from '@/lib/types';
 
 export const dynamic = 'force-dynamic';
@@ -27,7 +27,6 @@ export default async function Dashboard({ searchParams }: { searchParams: Promis
   const emAndamento = alugueis.filter((a) => a.status === 'em_andamento').sort((a, b) => a.data_volta_prevista.localeCompare(b.data_volta_prevista));
   const reservas = alugueis.filter((a) => a.status === 'reservado' && a.data_saida <= somaDias(hoje(), 14));
   const paraLimpar = (limpar.data ?? []) as Chopeira[];
-  const diasDesde = (iso?: string | null) => (iso ? Math.round((Date.parse(hoje() + 'T12:00:00Z') - Date.parse(iso.slice(0, 10) + 'T12:00:00Z')) / 864e5) : 0);
 
   const st = (contagem.data ?? []) as { status: string }[];
   const n = (s?: string) => (s ? st.filter((c) => c.status === s).length : st.filter((c) => c.status !== 'baixada').length);
